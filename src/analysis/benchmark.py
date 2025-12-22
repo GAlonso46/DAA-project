@@ -91,7 +91,7 @@ def run_benchmark(num_runs=1, jobs=[30, 60], machines=[4, 8]):
     print("\nBenchmark Results Summary:")
     print(df.groupby(["Jobs", "Machines"]).mean(numeric_only=True)[["LPT_Makespan", "SPT_Makespan", "Random_Makespan", "SA_Makespan", "GA_Makespan"]])
     
-    output_file = "benchmark_results_advanced.csv"
+    output_file = "benchmark_results.csv"
     df.to_csv(output_file, index=False)
     print(f"\nFull results saved to {output_file}")
 

@@ -5,12 +5,13 @@ from src.solvers.metaheuristic import GeneticSolver
 from src.solvers.simulated_annealing import SimulatedAnnealingSolver
 from src.solvers.tabu_search import TabuSearchSolver
 from src.utils.advanced_visualizer import AdvancedVisualizer
+from src.solvers.bruteforce import BruteForceSolver
 
 def main():
     print("--- 🏭 TecnoPlecision Scheduling System v2.0 ---")
     
     # Configuration
-    N_JOBS = 20
+    N_JOBS = 10
     N_MACHINES = 3
     N_RESOURCES = 2
     
@@ -30,8 +31,9 @@ def main():
     print("2. Genetic Algorithm (Robust)")
     print("3. Simulated Annealing (Recommended - Fast & Optimal)")
     print("4. Tabu Search (Memory-based)")
+    print("5. Brute Force (Exhaustive - small instances only)")
     
-    choice = input("Enter choice (1-4, default 3): ") or "3"
+    choice = input("Enter choice (1-5, default 3): ") or "3"
     
     if choice == "1":
         solver = GreedySolver(problem)
@@ -45,6 +47,23 @@ def main():
         solver = TabuSearchSolver(problem, max_iter=1000)
         solution = solver.solve()
         name = "Tabu Search"
+    elif choice == "5":
+        # Safety: compute number of combinations and ask confirmation for large runs
+        n = len(problem.jobs)
+        m = problem.num_machines
+        total = m ** n
+        if total > 1_000_000:
+            yn = input(f"Brute-force will evaluate {total} combinations. Continue? (y/N): ").lower()
+            if yn != 'y':
+                print("Operation cancelled by user.")
+                return
+        try:
+            solver = BruteForceSolver(problem, max_combinations=total)
+            solution = solver.solve()
+            name = "Brute Force"
+        except RuntimeError as e:
+            print(f"Brute-force aborted: {e}")
+            return
     else:
         solver = SimulatedAnnealingSolver(problem, max_iter=3000)
         solution = solver.solve()
@@ -53,13 +72,17 @@ def main():
     print(f"\n--- Results for {name} ---")
     print(f"Makespan: {solution.makespan}")
     
-    # Visualization
-    print("\nGenerating final visualizations...")
-    viz = AdvancedVisualizer(solution, problem)
-    viz.plot_rich_gantt(save_path="final_gantt.png")
-    viz.plot_resource_profile(save_path="final_resource_profile.png")
-    
-    print("Done! Check 'final_gantt.png' and 'final_resource_profile.png'.")
+    # Visualization: ask user before generating potentially expensive plots
+    view = input("Generate visualizations? (y/N): ").strip().lower() or "n"
+    if view == 'y':
+        print("\nGenerating final visualizations...")
+        viz = AdvancedVisualizer(solution, problem)
+        viz.plot_rich_gantt(save_path="final_gantt.png")
+        viz.plot_resource_profile(save_path="final_resource_profile.png")
+        print("Done! Check 'final_gantt.png' and 'final_resource_profile.png'.")
+    else:
+        print("Skipping visualizations.")
 
+    
 if __name__ == "__main__":
     main()

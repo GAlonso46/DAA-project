@@ -10,11 +10,26 @@ from src.solvers.bruteforce import BruteForceSolver
 def main():
     print("--- 🏭 TecnoPlecision Scheduling System v2.0 ---")
     
-    # Configuration
-    N_JOBS = 10
-    N_MACHINES = 3
-    N_RESOURCES = 2
-    
+    # Configuration (allow user to customize instance size)
+    print("\nInstance configuration (press Enter to use defaults):")
+    default_N_JOBS = 10
+    default_N_MACHINES = 3
+    default_N_RESOURCES = 2
+
+    def _read_int(prompt: str, default: int) -> int:
+        val = input(f"{prompt} [{default}]: ").strip()
+        if val == "":
+            return default
+        try:
+            return int(val)
+        except ValueError:
+            print(f"Invalid input, using default {default}.")
+            return default
+
+    N_JOBS = _read_int("Number of jobs", default_N_JOBS)
+    N_MACHINES = _read_int("Number of machines", default_N_MACHINES)
+    N_RESOURCES = _read_int("Number of resources", default_N_RESOURCES)
+
     print(f"Generating instance: {N_JOBS} jobs, {N_MACHINES} machines...")
     data = generate_instance(num_jobs=N_JOBS, num_machines=N_MACHINES, num_resources=N_RESOURCES)
     
@@ -77,9 +92,9 @@ def main():
     if view == 'y':
         print("\nGenerating final visualizations...")
         viz = AdvancedVisualizer(solution, problem)
-        viz.plot_rich_gantt(save_path="final_gantt.png")
-        viz.plot_resource_profile(save_path="final_resource_profile.png")
-        print("Done! Check 'final_gantt.png' and 'final_resource_profile.png'.")
+        viz.plot_rich_gantt(save_path="artifacts/final_gantt.png")
+        viz.plot_resource_profile(save_path="artifacts/final_resource_profile.png")
+        print("Done! Check 'artifacts/final_gantt.png' and 'artifacts/final_resource_profile.png'.")
     else:
         print("Skipping visualizations.")
 

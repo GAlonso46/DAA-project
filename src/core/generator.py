@@ -53,3 +53,60 @@ def generate_instance(num_jobs: int, num_machines: int, num_resources: int,
 def save_instance(data: Dict, filename: str):
     with open(filename, 'w') as f:
         json.dump(data, f, indent=4)
+
+def generate_random_instance(max_jobs: int, max_machines: int, max_resources: int,
+                             max_duration: int = 10, max_resource_qty: int = 5,
+                             resource_capacity_factor: float = 1.5) -> Dict:
+    """
+    Generate a random problem instance where the number of jobs, machines and resources
+    are chosen randomly but do not exceed the provided upper bounds.
+
+    Each chosen count is drawn uniformly from the range [1, bound] (resources may be 0).
+    Resource capacities and job requirements are generated so that no job requires more
+    of a resource than that resource's total capacity.
+    Returns the same data structure as generate_instance.
+    """
+    # normalize bounds
+    max_jobs = max(1, int(max_jobs))
+    max_machines = max(1, int(max_machines))
+    max_resources = max(0, int(max_resources))
+
+    # randomly choose actual instance sizes (resources can be 0)
+    num_jobs = random.randint(1, max_jobs)
+    num_machines = random.randint(1, max_machines)
+    num_resources = random.randint(0, max_resources) if max_resources > 0 else 0
+
+    # build resources (if any)
+    resources = {}
+    for r in range(1, num_resources + 1):
+        cap_upper = max(1, int(max_resource_qty * num_machines * resource_capacity_factor))
+        cap = random.randint(1, cap_upper)
+        resources[str(r)] = cap
+
+    # build jobs, ensuring each requirement <= corresponding resource capacity
+    jobs = []
+    for j in range(1, num_jobs + 1):
+        duration = random.randint(1, max_duration)
+        requirements = {}
+
+        if num_resources > 0:
+            num_reqs = random.randint(0, num_resources)
+            if num_reqs > 0:
+                req_resources = random.sample(range(1, num_resources + 1), num_reqs)
+                for r in req_resources:
+                    max_allowed = resources[str(r)]
+                    qty = random.randint(1, min(max_resource_qty, max_allowed))
+                    requirements[str(r)] = qty
+
+        jobs.append({
+            "id": j,
+            "duration": duration,
+            "requirements": requirements
+        })
+
+    data = {
+        "num_machines": num_machines,
+        "resources": resources,
+        "jobs": jobs
+    }
+    return data

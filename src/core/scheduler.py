@@ -90,6 +90,21 @@ class SolutionBuilder:
                 
                 if found_t != -1:
                     possible_starts.append((found_t, m_id))
+
+            # Si no encontramos ningún start entre los completion_times, hacemos fallback
+            if not possible_starts:
+                # Limite superior razonable: último completion + suma de duraciones pendientes
+                sorted_ct = sorted(completion_times)
+                last_ct = sorted_ct[-1] if sorted_ct else 0
+                remaining_horizon = last_ct + sum(j.duration for j in sequence)
+                for m_id in range(1, self.problem.num_machines + 1):
+                    m_free = machine_free_time[m_id]
+                    t0 = max(m_free, 0)
+                    # probeando tiempos desde t0 hasta remaining_horizon
+                    for t_candidate in range(t0, remaining_horizon + 1):
+                        if self._check_resources(t_candidate, job_node.duration, job_node.resource_requirements, resource_timeline):
+                            possible_starts.append((t_candidate, m_id))
+                            break    
             
             # Pick best machine (earliest start)
             possible_starts.sort()

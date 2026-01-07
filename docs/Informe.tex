@@ -1,0 +1,525 @@
+\documentclass[11pt,a4paper]{article}
+
+% -------------------------
+% Paquetes básicos
+% -------------------------
+\usepackage[spanish]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+
+% -------------------------
+% Matemática
+% -------------------------
+\usepackage{amsmath, amssymb}
+
+% -------------------------
+% Márgenes y layout
+% -------------------------
+\usepackage{geometry}
+\geometry{
+  left=3cm,
+  right=3cm,
+  top=3cm,
+  bottom=3cm
+}
+
+% -------------------------
+% Enlaces
+% -------------------------
+\usepackage[hidelinks]{hyperref}
+
+% -------------------------
+% Formato de títulos
+% -------------------------
+\usepackage{titlesec}
+\titleformat{\section}
+  {\Large\bfseries}
+  {\thesection}{1em}{}
+
+\titleformat{\subsection}
+  {\large\bfseries}
+  {\thesubsection}{1em}{}
+
+\titleformat{\subsubsection}
+  {\normalsize\bfseries}
+  {\thesubsubsection}{1em}{}
+
+% -------------------------
+% Espaciado
+% -------------------------
+\setlength{\parskip}{0.8em}
+\setlength{\parindent}{0pt}
+
+% -------------------------
+% Documento
+% -------------------------
+\begin{document}
+
+\begin{center}
+    {\LARGE \textbf{Informe Técnico: Optimización de Scheduling en TecnoPrecision Global LLC}}
+    
+    \vspace{0.8cm}
+    \textbf{Integrantes:} \\
+    \vspace{0.3cm}
+    Gabriel Alonso Coro --- Grupo C412 \\
+    Mauro Campver Barrios --- Grupo C411 \\
+    Josue Rolando Naranjo Sieiro --- Grupo C411
+\end{center}
+
+\vspace{1cm}
+
+% -------------------------
+% Resumen / Abstract
+% -------------------------
+\begin{abstract}
+\noindent Este informe presenta una solución integral para el problema de optimización de la programación de la producción en la planta de \textit{TecnoPrecision Global LLC}. El desafío se formaliza técnicamente como un problema de máquinas paralelas idénticas con restricciones de recursos acumulativos ($P_m \mid res \mid C_{max}$), cuya complejidad computacional se clasifica como NP-hard. Para abordar este reto, se diseñaron e implementaron tres aproximaciones algorítmicas: una búsqueda exhaustiva por fuerza bruta (\textit{BruteForceSolver}) para la obtención de óptimos globales en instancias reducidas, una heurística constructiva de tipo \textit{list-scheduling} (\textit{EarliestStartSolver}) y una metaheurística poblacional basada en Algoritmos Genéticos (\textit{GeneticSolver}). 
+
+El análisis experimental, realizado sobre un conjunto de 30 instancias de prueba, revela que el algoritmo de fuerza bruta alcanza su límite de computabilidad práctico al superar los 11 trabajos debido a la explosión exponencial del espacio de búsqueda. En contraste, el Algoritmo Genético demostró una eficacia excepcional, logrando un error relativo medio del 0.0\% respecto al óptimo en tiempos de ejecución escalables ($\approx 10$ s). Finalmente, se concluye con una recomendación estratégica que prioriza la metaheurística para la planificación diaria y el uso de la heurística \textit{greedy} para la gestión de contingencias en tiempo real.
+\end{abstract}
+
+\vspace{0.5cm}
+% =========================================================
+\section{Fase 1: Formalización del Problema}
+
+\subsection{El Fabricante Chino: Enunciado del Problema}
+
+En \textit{TecnoPrecision Global LLC}, nos enorgullece ser líderes en la fabricación de componentes electrónicos de alta precisión, operando bajo un modelo de producción ``bajo demanda'' para nuestros clientes más exigentes. Nuestra reputación se basa en la calidad y, fundamentalmente, en la rapidez y fiabilidad de nuestras entregas.
+
+Actualmente, nos enfrentamos a un desafío crítico que impacta directamente nuestra capacidad para cumplir con los plazos de entrega prometidos. Cuando recibimos un pedido de un cliente, este suele consistir en una lista de varios componentes electrónicos distintos que debemos fabricar. Contamos con varias \textbf{líneas de producción idénticas} en nuestra planta, lo que nos da flexibilidad para fabricar cualquier componente en cualquiera de ellas.
+
+Sin embargo, la fabricación de cada uno de estos componentes requiere el uso de \textbf{herramientas especializadas} de alta tecnología. Estas herramientas son muy costosas y, por lo tanto, tenemos un número limitado de cada tipo. Por ejemplo, solo disponemos de un cierto número de cabezales de soldadura láser de precisión o de equipos de calibración específicos. Un componente puede necesitar varias de estas herramientas, y algunas herramientas pueden ser compartidas por diferentes tipos de componentes.
+
+El problema que necesitamos resolver es el siguiente: \textbf{¿Cómo podemos organizar la fabricación de todos los componentes de un pedido de cliente de la manera más eficiente posible para que el pedido completo esté listo en el menor tiempo total?}
+
+Esto implica tomar decisiones clave:
+\begin{itemize}
+    \item ¿En qué orden debemos empezar a fabricar cada componente?
+    \item ¿Qué línea de producción debe utilizarse para cada componente?
+    \item \textbf{¿Cómo gestionamos la disponibilidad de nuestras herramientas especializadas?} Si una herramienta es necesaria para fabricar un componente en una línea, no puede usarse simultáneamente para otro componente en otra línea. La escasez de una herramienta específica puede crear un cuello de botella y detener la producción de varios componentes a la vez.
+\end{itemize}
+
+Necesitamos una solución que nos permita planificar la secuencia de fabricación de cada componente, asignándolos a nuestras líneas de producción y asegurando que las herramientas necesarias estén disponibles en el momento justo, para que el último componente del pedido esté terminado lo antes posible.
+
+\subsection{Clasificación del Problema}
+
+El problema de programación de la producción en la planta se define formalmente como un \textbf{Problema de Programación de Tareas en Máquinas Paralelas Idénticas con Restricciones de Recursos}. Bajo la clasificación técnica de tres campos propuesta por \textbf{Graham et al. (1979)}, este modelo se denota como:
+
+\[
+P_m \mid res \mid C_{max}
+\]
+
+Esta notación identifica que disponemos de $m$ máquinas idénticas ($P_m$), restricciones de recursos adicionales ($res$) y el objetivo de minimizar el tiempo de finalización de la última tarea o \emph{makespan} ($C_{max}$). El problema es inherentemente no preventivo (\emph{non-preemptive}), lo que añade una restricción de integridad temporal a cada tarea: una vez iniciada la fabricación de un componente, no puede ser interrumpida.
+
+
+
+\subsection{Definición de Estructuras de Datos}
+
+Para formalizar el modelo, se requieren las siguientes entradas:
+
+\begin{itemize}
+  \item \textbf{Conjunto de Trabajos ($J$):} $\{j_1, j_2, \dots, j_n\}$, donde cada $j$ es un componente del pedido.
+  \item \textbf{Conjunto de Máquinas ($M$):} $\{i_1, i_2, \dots, i_m\}$, representando las líneas de producción idénticas.
+  \item \textbf{Conjunto de Recursos ($R$):} $\{k_1, k_2, \dots, k_r\}$, que agrupa los tipos de herramientas especializadas.
+  \item \textbf{Vector de Tiempos ($P$):} donde $p_j$ es la duración estimada de la tarea $j$.
+  \item \textbf{Matriz de Recursos ($D$):} donde $r_{jk}$ indica la cantidad del recurso $k$ que requiere el trabajo $j$.
+  \item \textbf{Vector de Capacidades ($Q$):} donde $Q_k$ es la cantidad máxima disponible del recurso $k$.
+\end{itemize}
+
+\subsection{Modelo Matemático}
+
+\subsubsection{Función Objetivo}
+
+Minimizar el tiempo de término del último trabajo del pedido (\emph{Makespan}):
+
+\[
+\min C_{max}
+\]
+
+\subsubsection{Restricciones Fundamentales}
+
+\begin{enumerate}
+\item \textbf{Garantía de Procesamiento}
+
+Cada trabajo $j$ debe ser asignado a una única máquina $i$:
+
+\[
+\sum_{i=1}^{m} x_{ij} = 1, \quad \forall j \in J
+\]
+
+\item \textbf{No Solapamiento en Líneas (Disyunción)}
+
+Si dos trabajos $j$ y $l$ comparten la misma línea $i$, sus intervalos de ejecución no deben cruzarse:
+
+\[
+x_{ij} \cdot x_{il} = 1 \implies (S_j + p_j \le S_l) \cup (S_l + p_l \le S_j)
+\]
+
+\item \textbf{Disponibilidad de Herramientas (Capacidad Acumulativa)}
+
+Para cada recurso $k$ y en todo instante $t$, la demanda agregada de los trabajos activos debe ser menor o igual a la oferta total:
+
+\[
+\sum_{j: S_j \le t < S_j + p_j} r_{jk} \le Q_k, \quad \forall k \in R
+\]
+
+\item \textbf{Cota Superior del Tiempo}
+
+\[
+C_{max} \ge S_j + p_j, \quad \forall j \in J
+\]
+
+\end{enumerate}
+
+\subsection{Propiedades de la Salida (Solución Óptima)}
+
+Una solución válida debe entregar:
+
+\begin{enumerate}
+  \item \textbf{Plan de Inicio ($S$):} un valor de tiempo de comienzo preciso para cada componente.
+  \item \textbf{Asignación ($X$):} el mapeo de cada componente a su línea de producción correspondiente.
+  \item \textbf{Eficiencia de Red:} el valor de $C_{max}$ debe ser el mínimo global, garantizando que no existan retrasos por subutilización de máquinas mientras los recursos estén disponibles.
+\end{enumerate}
+
+% =========================================================
+% =========================================================
+\section{Fase 2: Análisis de Complejidad Computacional}
+
+\subsection{Preliminares: Optimización vs. Decisión}
+
+Para establecer la complejidad computacional del problema de optimización planteado ($P_m \mid res \mid C_{max}$), primero debemos formular su versión de \textbf{Problema de Decisión} asociada. La teoría de la NP-completitud se aplica directamente a problemas de decisión. Si demostramos que la versión de decisión es \textbf{NP-completa}, entonces el problema de optimización correspondiente es \textbf{NP-duro}.
+
+\textbf{Definición del Problema de Decisión $\Pi_{sched}$:}
+\begin{itemize}
+  \item \textbf{Instancia:} Un conjunto de trabajos $J$, máquinas $M$, recursos $R$, tiempos $p_j$, capacidades $Q_k$, demandas $r_{jk}$ y un valor entero $K$ (el límite de tiempo o \emph{deadline}).
+  \item \textbf{Pregunta:} ¿Existe un cronograma factible $\mathcal{S}$ tal que el tiempo de finalización de todos los trabajos sea menor o igual a $K$ ($C_{max} \le K$), respetando todas las restricciones de recursos y máquinas?
+\end{itemize}
+
+\subsection{Teorema de Complejidad}
+
+\textbf{Teorema 1.} El problema de decisión $\Pi_{sched}$ es \textbf{NP-completo}. En consecuencia, el problema de optimización asociado es \textbf{NP-duro}.
+
+\textbf{Estrategia de Demostración:}
+Para demostrar que un problema es NP-completo, deben cumplirse dos condiciones:
+\begin{enumerate}
+  \item \textbf{Condición 1 (Pertenencia a NP):} Demostrar que, dada una solución propuesta (certificado), es posible verificar su validez en tiempo polinomial.
+  \item \textbf{Condición 2 (NP-dureza):} Demostrar que un problema conocido como NP-completo (en este caso \textbf{PARTITION}) se reduce polinomialmente a una instancia restringida de nuestro problema.
+\end{enumerate}
+
+\subsection{Demostración de Pertenencia a NP}
+
+Sea $\mathcal{S}$ un certificado (solución candidata) que describe un cronograma: para cada trabajo $j$, especifica una máquina $m_i$ y un tiempo de inicio $t_j$. Un algoritmo verificador $\mathcal{V}$ debe comprobar las siguientes restricciones:
+
+\begin{enumerate}
+    \item \textbf{Unicidad y No-Solapamiento:} Verificar que cada trabajo se asigna exactamente a una máquina y que, en dicha máquina, el intervalo $[t_j, t_j + p_j)$ no se solapa con otros trabajos. Esto requiere ordenar los trabajos por máquina y tiempo, con complejidad $O(n \log n)$.
+    \item \textbf{Restricciones de Recursos:} Identificar los eventos discretos (tiempos de inicio y fin). Para cada intervalo entre eventos, sumar el consumo de cada recurso $k$ y verificar que no exceda $Q_k$. Dado que hay a lo sumo $2n$ eventos y $|R|$ recursos, esto toma $O(n \cdot |R|)$.
+    \item \textbf{Límite de Tiempo:} Verificar para todo $j$ que $t_j + p_j \le K$. Complejidad $O(n)$.
+\end{enumerate}
+
+Dado que todas las verificaciones se ejecutan en tiempo polinomial respecto al tamaño de la entrada, concluimos que $\Pi_{sched} \in \textbf{NP}$.
+
+
+
+\subsection{Definición del Problema Base: PARTITION}
+
+Para la segunda condición (NP-dureza), utilizaremos el problema de la Partición, uno de los 21 problemas NP-completos originales de Karp (1972).
+
+\textbf{Problema:} PARTITION
+\begin{itemize}
+  \item \textbf{Entrada:} Un conjunto finito $A = \{a_1, a_2, \dots, a_n\}$ de enteros positivos. Sea $W = \sum_{i=1}^n a_i$ la suma total.
+  \item \textbf{Pregunta:} ¿Existe un subconjunto $A' \subseteq A$ tal que
+  \[
+    \sum_{a \in A'} a = \sum_{a \in A \setminus A'} a = \frac{W}{2}?
+  \]
+\end{itemize}
+
+
+
+\subsection{Demostración de la Reducción Polinomial (PARTITION $\propto P_2 \parallel C_{max}$)}
+
+Sea una instancia arbitraria de PARTITION definida por el conjunto $A$. Construiremos una instancia de Scheduling con 2 máquinas ($P_2 \parallel C_{max}$) en tiempo polinomial.
+
+\textbf{Construcción de la Instancia de Scheduling:}
+\begin{enumerate}
+  \item Definimos el conjunto de trabajos $J = \{1, 2, \dots, n\}$, donde cada trabajo $j$ corresponde a $a_j \in A$.
+  \item El tiempo de procesamiento es $p_j = a_j$.
+  \item Definimos $m = 2$ máquinas.
+  \item No existen restricciones de recursos ($Q_k = \infty$).
+  \item Definimos el límite del \emph{makespan} como $K = W/2$.
+\end{enumerate}
+
+Esta transformación es lineal, $O(n)$.
+
+\textbf{Prueba de Equivalencia:}
+
+\textbf{($\Rightarrow$) Directa:}
+Si existe $A'$ tal que suma $W/2$, asignamos los trabajos de $A'$ a la Máquina 1 y el resto a la Máquina 2. Ambas terminan en $W/2 = K$. El cronograma es válido.
+
+\textbf{($\Leftarrow$) Inversa:}
+Si existe un cronograma válido con $C_{max} \le W/2$, y la suma total de trabajo es $W$, entonces ambas máquinas deben terminar exactamente en $W/2$ (no pueden terminar antes, pues sobraría trabajo, ni después, pues violaría $K$). Los trabajos en la Máquina 1 forman el conjunto $A'$.
+
+\subsection{Generalización y Conclusión}
+
+Hemos demostrado que $P_2 \parallel C_{max}$ es NP-completo. Ahora conectamos esto con el problema general de \textit{TecnoPrecision Global LLC} ($P_m \mid res \mid C_{max}$).
+
+Utilizamos el argumento de \textbf{inclusión de instancias}. Sea $\Psi_{Gen}$ el espacio de instancias del problema general y $\Psi_{P2}$ el espacio de instancias sin recursos con 2 máquinas. Se cumple que $\Psi_{P2} \subset \Psi_{Gen}$.
+
+\textbf{Conclusión:}
+Dado que el problema general contiene como caso particular a un problema NP-completo, el problema general es al menos tan difícil como este. Por tanto, el problema de optimización $P_m \mid res \mid C_{max}$ es \textbf{NP-duro}.
+
+% =========================================================
+% =========================================================
+\section{Fase 3: Diseño de Soluciones Algorítmicas}
+
+\subsection*{Algoritmos implementados}
+
+En esta sección se detallan las estrategias algorítmicas diseñadas para resolver el problema de \textit{scheduling} con restricciones de recursos, abarcando desde el enfoque exacto hasta heurísticas avanzadas y metaheurísticas.
+
+\subsubsection*{1. BruteForceSolver (\texttt{bruteforce.py})}
+
+Este solver implementa un enfoque de búsqueda exhaustiva para garantizar el óptimo global en instancias de tamaño reducido.
+
+\begin{itemize}
+    \item \textbf{Idea algorítmica:} El algoritmo enumera todas las asignaciones posibles de $n$ trabajos a $m$ máquinas (un espacio de búsqueda de $m^n$). Para cada asignación, construye un horario factible preservando el orden relativo de los trabajos. La construcción del horario utiliza una simulación por ``eventos'' (instantes de finalización o liberación), manteniendo una línea temporal discreta para la gestión de recursos acumulativos.
+    \item \textbf{Complejidad:} 
+    \begin{itemize}
+        \item \textbf{Tiempo:} $O(m^n \cdot C_{sched})$, donde $C_{sched}$ es el coste de simular el horario (dependiente de $n$, $m$ y los chequeos de recursos).
+        \item \textbf{Espacio:} $O(n + m + R)$, para almacenar la mejor solución y las estructuras de uso de recursos.
+    \end{itemize}
+\end{itemize}
+
+\begin{verbatim}
+Entrada: problem (n trabajos, m máquinas), max_combinations
+if m^n > max_combinations: error
+
+mejor_sol ← None; mejor_makespan ← ∞
+
+for cada asignación assign ∈ {1..m}^n:
+    machine_queues ← construir colas preservando orden original
+    sol ← BuildScheduleForAssignment(machine_queues)
+    if sol != None and sol.makespan < mejor_makespan:
+        mejor_makespan ← sol.makespan
+        mejor_sol ← sol
+return mejor_sol
+\end{verbatim}
+
+\textbf{Subrutina: BuildScheduleForAssignment}
+Simula la ejecución de una asignación fija. Si en algún punto un trabajo no puede ser ubicado por restricciones de recursos, la asignación se descarta.
+
+\begin{verbatim}
+function BuildScheduleForAssignment(machine_queues):
+    machine_free_time[m] ← 0; timeline ← {}; completion_times ← {0}
+    remaining ← copia de machine_queues; solution_jobs ← []
+
+    while existe trabajo en remaining:
+        candidates ← []
+        for cada máquina i con cola no vacía:
+            job ← primer trabajo de remaining[i]
+            cand_times ← sorted({t ∈ completion_times | t ≥ machine_free_time[i]})
+            found ← primer t tal que CheckResources(t, job)
+            if found existe: candidates.append((found, i, job))
+        
+        if candidates vacío: return None
+        elegir (start, m, job) con menor start
+        asignar job; actualizar timeline y tiempos; pop job de remaining[m]
+    
+    return Solution(solution_jobs, max(finish_times))
+\end{verbatim}
+
+
+
+\subsubsection*{2. EarliestStartSolver (\texttt{earliest\_start\_solver.py})}
+
+Es una heurística voraz (\textit{greedy}) de tipo \textit{list-scheduling} diseñada para obtener soluciones rápidas y factibles.
+
+\begin{itemize}
+    \item \textbf{Idea algorítmica:} En cada iteración, el algoritmo evalúa todos los trabajos no asignados y calcula para cada uno el par (\textit{earliest\_start\_time}, máquina) más temprano posible. Se consideran ``tiempos relevantes'' basados en los eventos de finalización de tareas ya programadas. Se selecciona el trabajo que pueda iniciar antes en el tiempo global y se fija en el cronograma.
+    \item \textbf{Complejidad:} $O(n \cdot (n \cdot m \cdot C_{check}))$. En cada una de las $n$ asignaciones, se exploran $m$ máquinas para los trabajos restantes.
+\end{itemize}
+
+\begin{verbatim}
+while unassigned no vacío:
+    earliest_list ← []
+    current_candidates ← sorted(completion_times)
+    
+    for cada job en unassigned:
+        best_start ← ∞; best_machine ← None
+        for m in 1..m:
+            m_free ← machine_free_time[m]
+            valid_t ← {t ∈ current_candidates | t ≥ m_free}
+            found ← primer t tal que CheckResources(t, job, timeline)
+            if found < best_start:
+                best_start ← found; best_machine ← m
+        if best_machine != None:
+            earliest_list.append((best_start, best_machine, job))
+
+    (start, m, job) ← elegir menor start en earliest_list
+    asignar job; actualizar estados; eliminar de unassigned
+\end{verbatim}
+
+\item \textbf{Análisis de cotas para el peor caso:}
+    
+    Dado que el \texttt{EarliestStartSolver} opera como una heurística de tipo \textit{List Scheduling}, su desviación respecto al óptimo en el peor escenario está acotada teóricamente por los resultados de Garey y Graham (1975). El modelo considerado en dicho estudio se alinea con el problema de este proyecto bajo las siguientes definiciones:
+    
+    \begin{itemize}
+        \item \textbf{Procesadores ($n$):} Un conjunto de $n$ máquinas idénticas disponibles en paralelo.
+        \item \textbf{Tareas:} Un conjunto finito de trabajos con tiempos de ejecución $\tau_i$. En este trabajo, el orden parcial es vacío ($\le \emptyset$), lo que implica que las tareas son independientes.
+        \item \textbf{Recursos ($s$):} Existen $s$ tipos de recursos $R = \{R_1, \dots, R_s\}$ con capacidades normalizadas.
+        \item \textbf{Restricción:} La suma de las demandas de un recurso $R_i$ por las tareas activas en cualquier instante $t$ no puede exceder su capacidad total.
+    \end{itemize}
+
+    Bajo estas condiciones, la razón entre el \textit{makespan} obtenido por la heurística ($\omega$) y el óptimo ($\omega^*$) cumple con:
+
+    \begin{itemize}
+        \item \textbf{Teorema (Máquinas abundantes):} Si el número de procesadores no restringe el paralelismo frente a los recursos, la cota depende únicamente de la diversidad de herramientas:
+        \[
+        \frac{\omega}{\omega^*} \le s + 1
+        \]
+        Donde $s$ es el número de tipos de recursos. En el peor caso, una gestión ineficiente de la contención puede degradar la solución hasta $(s+1)$ veces.
+
+        \item \textbf{Teorema (Cota general):} Para un número finito de procesadores ($n \ge 2$), la cota integra tanto la limitación de máquinas como la congestión de recursos:
+        \[
+        \frac{\omega}{\omega^*} \le \min\left\{2n + 1,\; s + 2 - \frac{n}{2s + 1}\right\}
+        \]
+    \end{itemize}
+    
+    Estas cotas actúan como una garantía matemática de que el \texttt{EarliestStartSolver} nunca excederá estos límites de ineficiencia, independientemente de la complejidad de la instancia.
+
+\subsubsection*{3. GeneticSolver (\texttt{metaheuristic.py})}
+
+Metaheurística poblacional que explora el espacio de permutaciones de trabajos para minimizar el \textit{makespan}.
+
+\begin{itemize}
+    \item \textbf{Representación:} Cada individuo es una permutación de los trabajos. El \textit{fitness} se calcula convirtiendo la secuencia en un horario factible mediante el constructor de soluciones.
+    \item \textbf{Operadores:} Utiliza selección por torneo ($k=3$), cruce de orden (\textit{Order Crossover} - OX) para preservar la estructura secuencial, y mutación por intercambio (\textit{swap}).
+    \item \textbf{Mecanismo de Reinicio:} Si la población se estanca (no hay mejora en $X$ generaciones), se realiza un reinicio manteniendo solo a los individuos de élite para fomentar la exploración de nuevas zonas del espacio de búsqueda.
+\end{itemize}
+
+
+
+\begin{verbatim}
+Entrada: pop_size, generations, mutation_rate, restart_threshold
+población ← [shuffle(base_jobs) for _ in 1..pop_size]
+
+for gen in 1..generations:
+    evaluar fitness de cada individuo; actualizar mejor_sol
+    
+    if gens_sin_mejora ≥ restart_threshold:
+        población ← [élite + nuevos_aleatorios]
+        continue
+
+    nueva_población ← [elitismo de 2]
+    while len(nueva_población) < pop_size:
+        p1, p2 ← seleccionar_padres_torneo(k=3)
+        hijo ← OX(p1, p2) if random < crossover_rate else p1
+        nueva_población.append(mutar_swap(hijo))
+    población ← nueva_población
+
+return mejor_sol
+\end{verbatim}
+
+\textit{Complejidad aproximada:} $O(\text{generaciones} \cdot \text{población} \cdot C_{sched})$.
+
+
+\section{Fase 4: Implementación y análisis experimental}
+
+En esta fase se evalúa el desempeño computacional y la eficacia de los algoritmos implementados. El análisis se sustenta en los datos recolectados en los archivos \texttt{bruteforce\_scaling.csv} (escalabilidad del método exacto) y \texttt{results.csv} (comparativa de rendimiento en 30 instancias de prueba).
+
+\subsection{Límite de computabilidad del algoritmo exacto (Fuerza Bruta)}
+
+El estudio de escalabilidad evidencia la naturaleza exponencial del problema de \emph{scheduling} con restricciones de recursos, confirmando su clasificación como NP-hard.
+
+\begin{itemize}
+    \item \textbf{Tamaño Máximo Resuelto:} Según los registros de ejecución, el algoritmo de fuerza bruta logró resolver de manera óptima instancias de hasta \textbf{12 trabajos} dentro de un tiempo razonable.
+    \item \textbf{Comportamiento de la curva de tiempo:} Para instancias pequeñas ($n < 8$), los tiempos de respuesta son triviales (inferiores a 0.1s). Sin embargo, al superar los 10 trabajos, el tiempo de ejecución crece de forma exponencial debido a la explosión del espacio de búsqueda. 
+\end{itemize}
+
+
+
+\subsection{Instancias de prueba}
+
+Para validar el comportamiento del sistema y comparar el desempeño de las heurísticas frente al óptimo global, se diseñaron cinco instancias de prueba específicas y se generaron 25 instancias aleatorias, todas con una dimensión máxima de 11 trabajos. Esta reducción permite que el algoritmo de fuerza bruta obtenga una solución exacta en un tiempo razonable, sirviendo como métrica de error para el resto de los \emph{solvers}. A continuación una explicación de cada una de las instancias específicas elaboradas.
+
+\begin{enumerate}
+    \item \textbf{Resource Bottleneck (Mini):} 
+    Consta de 11 trabajos que compiten por un único recurso crítico con capacidad limitada ($2$). El objetivo es verificar si el algoritmo gestiona correctamente la ociosidad forzada en las máquinas cuando el factor limitante no es la capacidad de procesamiento, sino la disponibilidad de herramientas.
+
+    \item \textbf{High Contention (Mini):} 
+    Diseñada con una estructura de dependencia circular de recursos. Cada trabajo requiere un par de herramientas específicas, creando una red de incompatibilidades. Evalúa la capacidad de los algoritmos para encontrar combinaciones de trabajos que puedan ejecutarse en paralelo sin violar las restricciones acumulativas.
+
+    \item \textbf{The Rock \& Sand (Mini):} 
+    Presenta un escenario de heterogeneidad extrema con un trabajo de muy larga duración (``la roca'') que requiere un recurso exclusivo, frente a 10 trabajos cortos (``la arena'') que no requieren recursos. La prueba mide si el \emph{solver} es capaz de balancear la carga rellenando los huecos temporales de las máquinas libres mientras se procesa la tarea larga.
+
+    \item \textbf{Irrelevant Resources (Mini):} 
+    Actúa como escenario de control o \emph{sanity check}. En esta instancia, la disponibilidad de recursos iguala al número de máquinas. El objetivo es confirmar que el algoritmo converge a una solución de \emph{List Scheduling} clásica, donde el recurso deja de ser un cuello de botella y la optimización depende únicamente de la duración de los trabajos.
+
+    \item \textbf{Greedy Killer (Mini):} 
+    Un escenario contraintuitivo donde existen varios trabajos cortos que requieren herramientas y un trabajo de duración media libre de recursos. Está diseñada para penalizar heurísticas puramente voraces que, al intentar maximizar la ocupación inmediata de máquinas, podrían posponer innecesariamente el trabajo largo, resultando en un \emph{makespan} subóptimo.
+\end{enumerate}
+
+\subsection{Comparativa de calidad de soluciones (Makespan)}
+
+Para evaluar la eficacia de los algoritmos propuestos, se realizó una comparativa utilizando como referencia los resultados del \texttt{BruteForceSolver}. Dado que este es un algoritmo exacto, su solución representa el óptimo global ($C^*_{max}$). 
+
+De las 30 instancias de prueba, el algoritmo de fuerza bruta logró resolver exitosamente \textbf{23 instancias} antes de exceder el tiempo límite de ejecución(10 minutos). El análisis de calidad se restringe a este subconjunto para garantizar la precisión del cálculo del error relativo, definido como $E_{rel} = (C_{algo} - C^*) / C^*$.
+
+\begin{itemize}
+    \item \textbf{GeneticSolver:} Demostró una precisión excepcional, alcanzando un \textbf{error relativo medio del 0.0\%} respecto al óptimo en todas las instancias evaluadas. Esto indica que la configuración de la población y las tasas de mutación son suficientes para converger al óptimo global en problemas de dimensiones moderadas (hasta 11-12 trabajos).
+    \item \textbf{EarliestStartSolver:} Al ser una heurística constructiva \textit{greedy}, presenta una desviación mayor pero controlada, con un \textbf{error relativo medio del 3.52\%} y una desviación estándar del 7.09\%. Es capaz de encontrar el óptimo en escenarios de baja contención (error mediano de 0.0\%), pero su rendimiento se degrada ligeramente en instancias con alta competencia por recursos donde una decisión local inmediata perjudica el horizonte lejano del cronograma.
+\end{itemize}
+
+
+
+\subsection{Análisis de tiempos de ejecución}
+
+El tiempo de cómputo es un factor crítico para la aplicabilidad del sistema en un entorno de producción real. Los resultados reflejan el compromiso entre la calidad de la solución y el esfuerzo computacional requerido.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{lrrr}
+\hline
+\textbf{Solver} & \textbf{Tiempo Medio (s)} & \textbf{Mediana (s)} & \textbf{Desv. Est. (s)} \\ \hline
+\texttt{EarliestStart} & 0.0013 & 0.0008 & 0.0014 \\
+\texttt{GeneticSolver} & 10.5228 & 8.8879 & 8.2910 \\
+\texttt{BruteForce}* & 7.9481 & 0.0076 & 32.5693 \\ \hline
+\end{tabular}
+\caption{Estadísticas de tiempo de ejecución por algoritmo (*Solo instancias exitosas).}
+\label{tab:tiempos_ejecucion}
+\end{table}
+
+\begin{enumerate}
+    \item \textbf{Eficiencia de la Heurística:} El \texttt{EarliestStartSolver} destaca por su rapidez extrema, resolviendo cualquier instancia en milisegundos. Esta característica lo posiciona como la herramienta ideal para escenarios de reprogramación dinámica ante imprevistos en la planta.
+    \item \textbf{Escalabilidad de la Metaheurística:} Aunque el \texttt{GeneticSolver} es más lento en promedio ($\approx 10.5s$), su tiempo de ejecución se mantiene estable incluso en las instancias donde la fuerza bruta falla. El coste computacional está dominado por el número de generaciones y el tamaño de la población, lo que permite predecir el tiempo de espera del usuario.
+    \item \textbf{Inviabilidad de la Fuerza Bruta:} El \texttt{BruteForceSolver} presenta una volatilidad extrema (desviación estándar de 32.5s). Mientras que resuelve instancias triviales instantáneamente, su tiempo escala de forma exponencial, alcanzando el estado de \textit{timeout} (300s) en el 23.3\% de los casos probados, confirmando su limitación teórica.
+\end{enumerate}
+
+\subsection{Conclusión experimental}
+
+El análisis empírico realizado permite extraer conclusiones definitivas sobre la capacidad de respuesta y precisión del sistema frente a las necesidades de \textbf{TecnoPrecision Global LLC}:
+
+\begin{itemize}
+    \item \textbf{Inviabilidad del Enfoque Exacto:} Los experimentos de escalabilidad confirman que el \texttt{BruteForceSolver} presenta una barrera infranqueable cerca de los $n=11$ trabajos. El crecimiento de las combinaciones ($m^n$) y la complejidad de la validación de recursos hacen que el cálculo del óptimo global sea impracticable para las instancias de producción real (20-25 trabajos), donde el algoritmo superó consistentemente el tiempo de espera de 300 segundos.
+    
+    \item \textbf{Eficacia de la Metaheurística:} El \texttt{GeneticSolver} se posiciona como el algoritmo más equilibrado. Su capacidad para obtener un \textbf{error relativo del 0.0\%} en todas las instancias comparables, manteniendo tiempos de ejecución estables ($\approx 10$ s), demuestra que la exploración del espacio de permutaciones mediante operadores genéticos es capaz de sortear las restricciones de recursos de manera mucho más eficiente que la búsqueda exhaustiva.
+    
+    \item \textbf{Robustez de las Heurísticas:} Aunque el \texttt{EarliestStartSolver} presenta un error marginal del 3.52\%, su velocidad de respuesta es inigualable. La proximidad de sus resultados al óptimo en la mayoría de las instancias sugiere que, para el conjunto de herramientas y máquinas actual, las decisiones \textit{greedy} son una aproximación aceptable.
+\end{itemize}
+
+
+
+\textbf{Recomendación Final:} Se recomienda la integración del \textbf{GeneticSolver} como motor principal de planificación diaria, asegurando entregas fiables con el menor \textit{makespan} posible. El \textbf{EarliestStartSolver} debe reservarse como un mecanismo de contingencia para re-planificación instantánea en caso de averías en las líneas de producción o cambios de última hora en los pedidos del cliente.
+
+
+
+\subsection*{Referencias Bibliográficas}
+
+\begin{itemize}
+  \item Graham, R. L., Lawler, E. L., Lenstra, J. K., \& Rinnooy Kan, A. H. G. (1979). \emph{Optimization and approximation in deterministic sequencing and scheduling: A survey}. \emph{Annals of Discrete Mathematics}, 5, 287--326. \url{https://doi.org/10.1016/S0167-5060(08)70356-X}
+  \item Garey, M. R., \& Johnson, D. S. (1979). \emph{Computers and Intractability: A Guide to the Theory of NP-Completeness}. W. H. Freeman and Company.
+  \item Garey, M. R., \& Graham, R. L. (1975). \emph{Bounds for Multiprocessor Scheduling with Resource Constraints}. \emph{SIAM Journal on Computing}, 4(2).
+\end{itemize}
+
+
+
+\end{document}

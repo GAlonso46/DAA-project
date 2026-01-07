@@ -1,0 +1,73 @@
+{
+    "num_machines": 3,
+    "resources": {
+        "1": 11,
+        "2": 10
+    },
+    "jobs": [
+        {
+            "id": 1,
+            "duration": 7,
+            "requirements": {}
+        },
+        {
+            "id": 2,
+            "duration": 5,
+            "requirements": {
+                "2": 1,
+                "1": 1
+            }
+        },
+        {
+            "id": 3,
+            "duration": 8,
+            "requirements": {
+                "2": 2
+            }
+        },
+        {
+            "id": 4,
+            "duration": 8,
+            "requirements": {}
+        },
+        {
+            "id": 5,
+            "duration": 4,
+            "requirements": {
+                "2": 1,
+                "1": 4
+            }
+        },
+        {
+            "id": 6,
+            "duration": 7,
+            "requirements": {}
+        },
+        {
+            "id": 7,
+            "duration": 2,
+            "requirements": {
+                "1": 5,
+                "2": 2
+            }
+        },
+        {
+            "id": 8,
+            "duration": 9,
+            "requirements": {}
+        },
+        {
+            "id": 9,
+            "duration": 2,
+            "requirements": {
+                "2": 5,
+                "1": 5
+            }
+        },
+        {
+            "id": 10,
+            "duration": 10,
+            "requirements": {}
+        }
+    ]
+}

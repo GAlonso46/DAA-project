@@ -1,0 +1,11 @@
+{
+    "num_machines": 1,
+    "resources": {},
+    "jobs": [
+        {
+            "id": 1,
+            "duration": 7,
+            "requirements": {}
+        }
+    ]
+}

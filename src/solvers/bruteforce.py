@@ -13,7 +13,8 @@ class BruteForceSolver:
     a RuntimeError if the number of combinations exceeds 1_000_000 to avoid
     accidental exhaustive runs on large instances.
     """
-    def __init__(self, problem: ProblemInstance, max_combinations: int = 1_000_000):
+    def __init__(self, problem: ProblemInstance, max_combinations: int = None):
+        # allow unlimited search when max_combinations is None
         self.problem = problem
         self.max_combinations = max_combinations
 
@@ -21,11 +22,8 @@ class BruteForceSolver:
         n = len(self.problem.jobs)
         m = self.problem.num_machines
         total = m ** n
-        if total > self.max_combinations:
-            raise RuntimeError(
-                f"Brute-force too large: {total} combinations (limit {self.max_combinations})."
-            )
-
+        # No longer raise on large combination counts. If max_combinations is set
+        # it is treated as advisory but will not stop execution here.
         best_sol = None
         best_makespan = float('inf')
 

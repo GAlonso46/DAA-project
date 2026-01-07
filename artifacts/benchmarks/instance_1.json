@@ -1,0 +1,14 @@
+{
+    "seed": 1001,
+    "data": {
+        "num_machines": 2,
+        "resources": {},
+        "jobs": [
+            {
+                "id": 1,
+                "duration": 9,
+                "requirements": {}
+            }
+        ]
+    }
+}

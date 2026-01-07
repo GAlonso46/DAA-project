@@ -145,6 +145,59 @@ Sin embargo, hemos demostrado que $\Psi_{P2}$ es NP-completo. Por lo tanto, tal 
 
 Esto demuestra formalmente que el problema $P_m \mid res \mid C_{max}$ es **al menos tan difícil** como PARTITION, y por ende, es **NP-duro**.
 
+
+## Fase 3: Diseño de Soluciones Algorítmicas
+
+Solvers implementados:
+
+- BruteForceSolver (bruteforce.py)
+  - Enumeración exhaustiva de todas las asignaciones de n trabajos a m máquinas. Para cada asignación construye un schedule que preserva el orden relativo por máquina y verifica las restricciones de recursos mediante una simulación temporal discreta. Se incorpora un umbral de combinaciones para prevenir ejecuciones prohibitivas; usado como oráculo exacto en instancias pequeñas.
+
+- EarliestStartSolver (earliest_start_solver.py)
+  - Heurística voraz de tipo list‑scheduling: en cada iteración calcula para cada trabajo no asignado el par (inicio factible más temprano, máquina) evaluando candidatos basados en eventos (finalizaciones y tiempos libres) y un fallback hasta el último tiempo libre. Actualiza una línea temporal de uso de recursos para preservar factibilidad.
+
+- GeneticSolver (metaheuristic.py)
+  - Metaheurística sobre permutaciones (representación por secuencias de Job). Componentes: población inicial aleatoria, selección por torneo, cruza OX adaptada a objetos Job, mutación por intercambio, elitismo y mecanismo de reinicio ante estancamiento. Fitness = makespan obtenido por SolutionBuilder.
+
+- GreedySolver (greedy.py)
+  - Implementa List Scheduling con varias estrategias de ordenación (LPT, SPT, heurísticas sensibles a recursos como 'HeavyResource' y 'MostTotalResources'). Genera schedules a partir de la secuencia ordenada y selecciona la mejor estrategia por evaluación empírica.
+
+- SimulatedAnnealingSolver (simulated_annealing.py)
+  - Búsqueda local estocástica sobre permutaciones: vecinos por intercambio de dos posiciones, aceptación probabilística P = exp(−Δ/T) y enfriamiento multiplicativo. Mantiene la mejor solución observada y registra historial de mejora.
+
+Comentarios de implementación y uso:
+
+- Todas las implementaciones gestionan la restricción acumulativa de recursos mediante una estructura temporal discreta (mapa tiempo → uso por recurso).
+- El protocolo de evaluación recomendado combina: (i) oráculo exacto (BruteForce) para instancias pequeñas; (ii) heurísticas deterministas (Greedy, EarliestStart) para soluciones rápidas y interpretables; (iii) metaheurísticas (Genetic, SA) para exploración intensiva cuando la dimensión lo requiere.
+
+Análisis teórico adicional: cotas en el Augmented Model (Garey & Graham, 1975)
+
+El artículo "Bounds for Multiprocessor Scheduling with Resource Constraints" de Garey y Graham (1975) proporciona cotas worst‑case para el rendimiento de heurísticas de tipo List Scheduling cuando se introducen restricciones acumulativas de recursos. Para el caso de interés de este proyecto —Augmented Model con orden parcial vacío (<=∅), es decir, tareas independientes— los resultados relevantes se resumen a continuación.
+
+Definición del modelo considerado en el artículo
+
+- Procesadores: n procesadores idénticos (líneas de producción).
+- Tareas: conjunto finito de tareas con tiempos de ejecución τ_i.
+- Recursos: s tipos de recursos R = {R1, ..., Rs} con capacidad normalizada (por ejemplo, 1).
+- Restricción: en cualquier instante la suma de demandas activas sobre un recurso Ri no puede exceder su capacidad.
+- Orden parcial vacío (<=∅): no hay precedencias entre tareas (caso de tareas independientes, como en este trabajo).
+
+Resultados clave (razón ω/ω* entre makespan voraz ω y óptimo ω*):
+
+- Teorema 2 (caso de máquinas abundantes):
+  Si el número de máquinas permite procesar simultáneamente muchas tareas (n ≥ r en la notación del artículo) y el orden es vacío, entonces
+
+  ω / ω* ≤ s + 1
+
+  donde s es el número de tipos de recursos. Interpretación: en el peor caso una heurística voraz que no gestione adecuadamente la contención por recursos puede producir un makespan hasta (s+1) veces peor que el óptimo.
+
+- Teorema 3 (cota general para máquinas limitadas):
+  Para un número finito de procesadores (n ≥ 2) y múltiples recursos s, con orden vacío, el artículo da la cota
+
+  ω / ω* ≤ min{2n + 1, s + 2 − n / (2s + 1)}
+
+  que combina la contribución del cuello de botella por procesadores y la contribución por congestión de recursos. Esta expresión indica que la degradación worst‑case está acotada por términos que dependen simultáneamente de n y s.
+
 ---
 
 ### Referencias Bibliográficas
@@ -152,3 +205,5 @@ Esto demuestra formalmente que el problema $P_m \mid res \mid C_{max}$ es **al m
 Graham, R. L., Lawler, E. L., Lenstra, J. K., & Rinnooy Kan, A. H. G. (1979). Optimization and approximation in deterministic sequencing and scheduling: A survey. *Annals of Discrete Mathematics*, 5, 287-326. https://doi.org/10.1016/S0167-5060(08)70356-X
 
 Garey, M. R., & Johnson, D. S. (1979). *Computers and Intractability: A Guide to the Theory of NP-Completeness*. W. H. Freeman and Company.
+
+Garey, M. R., & Graham, R. L. (1975). Bounds for Multiprocessor Scheduling with Resource Constraints. *SIAM Journal on Computing*, 4(2), June 1975.

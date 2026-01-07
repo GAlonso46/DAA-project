@@ -6,6 +6,7 @@ from src.solvers.simulated_annealing import SimulatedAnnealingSolver
 from src.solvers.tabu_search import TabuSearchSolver
 from src.utils.advanced_visualizer import AdvancedVisualizer
 from src.solvers.bruteforce import BruteForceSolver
+from src.solvers.earliest_start_solver import EarliestStartSolver
 
 def main():
     print("--- 🏭 TecnoPlecision Scheduling System v2.0 ---")
@@ -47,9 +48,10 @@ def main():
     print("3. Simulated Annealing (Recommended - Fast & Optimal)")
     print("4. Tabu Search (Memory-based)")
     print("5. Brute Force (Exhaustive - small instances only)")
-    
-    choice = input("Enter choice (1-5, default 3): ") or "3"
-    
+    print("6. Earliest Start (Iterative earliest-placement)")
+
+    choice = input("Enter choice (1-6, default 3): ") or "3"
+
     if choice == "1":
         solver = GreedySolver(problem)
         solution = solver.solve('LPT')
@@ -79,6 +81,10 @@ def main():
         except RuntimeError as e:
             print(f"Brute-force aborted: {e}")
             return
+    elif choice == "6":
+        solver = EarliestStartSolver(problem)
+        solution = solver.solve()
+        name = "Earliest Start Solver"
     else:
         solver = SimulatedAnnealingSolver(problem, max_iter=3000)
         solution = solver.solve()

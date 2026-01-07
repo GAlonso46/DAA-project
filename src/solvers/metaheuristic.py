@@ -100,39 +100,47 @@ class GeneticSolver:
         return best_sol
 
     def _tournament(self, pop_fitness, k=3):
+        # Defensive: ensure population not empty and clamp k
+        if not pop_fitness:
+            raise RuntimeError("Population fitness list is empty in tournament selection")
+        k = max(1, min(k, len(pop_fitness)))
         candidates = random.sample(pop_fitness, k)
         candidates.sort(key=lambda x: x[0])
-        return candidates[0][1] # Return sequence
+        # Return a copy of the sequence to avoid accidental aliasing
+        return candidates[0][1][:]
 
     def _ox_crossover(self, p1: List[Job], p2: List[Job]) -> List[Job]:
         # Optimized Order Crossover (OX) with Set lookup
         size = len(p1)
+        # If too small, return a copy
+        if size < 2:
+            return p1[:]
         start, end = sorted(random.sample(range(size), 2))
-        
+
         child = [None] * size
         # Copy subsegment from p1
         child[start:end+1] = p1[start:end+1]
-        
-        # Create set for fast lookup of jobs already in child
-        # Note: Job objects might not be hashable by default or hashing id?
-        # dataclass is not hashable strictly if not frozen. 
-        # But we can use job.id for set.
+
+        # Create set for fast lookup of jobs already in child (use ids)
         jobs_in_child = {job.id for job in child if job is not None}
-        
+
         current_p2_idx = 0
         for i in range(size):
             if child[i] is None:
                 # Find next job in p2 that is not in child
                 while current_p2_idx < size and p2[current_p2_idx].id in jobs_in_child:
                     current_p2_idx += 1
-                
+
                 if current_p2_idx < size:
                     child[i] = p2[current_p2_idx]
                     jobs_in_child.add(p2[current_p2_idx].id)
-                
+
         return child
 
     def _mutate(self, sequence: List[Job]) -> List[Job]:
+        # Guard against tiny sequences
+        if len(sequence) < 2:
+            return sequence
         if random.random() < self.mutation_rate:
             idx1, idx2 = random.sample(range(len(sequence)), 2)
             sequence[idx1], sequence[idx2] = sequence[idx2], sequence[idx1]

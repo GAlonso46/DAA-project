@@ -1,0 +1,45 @@
+{
+    "seed": 1006,
+    "data": {
+        "num_machines": 1,
+        "resources": {
+            "1": 4
+        },
+        "jobs": [
+            {
+                "id": 1,
+                "duration": 1,
+                "requirements": {}
+            },
+            {
+                "id": 2,
+                "duration": 10,
+                "requirements": {
+                    "1": 2
+                }
+            },
+            {
+                "id": 3,
+                "duration": 9,
+                "requirements": {
+                    "1": 1
+                }
+            },
+            {
+                "id": 4,
+                "duration": 7,
+                "requirements": {}
+            },
+            {
+                "id": 5,
+                "duration": 5,
+                "requirements": {}
+            },
+            {
+                "id": 6,
+                "duration": 5,
+                "requirements": {}
+            }
+        ]
+    }
+}

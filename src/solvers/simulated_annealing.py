@@ -32,9 +32,13 @@ class SimulatedAnnealingSolver:
         for i in range(self.max_iter):
             # 2. Generate Neighbor (Swap)
             neighbor_sequence = current_sequence[:]
-            idx1, idx2 = random.sample(range(len(neighbor_sequence)), 2)
-            neighbor_sequence[idx1], neighbor_sequence[idx2] = neighbor_sequence[idx2], neighbor_sequence[idx1]
-            
+            if len(neighbor_sequence) < 2:
+                # Nothing to swap for sequences of length < 2
+                neighbor_sequence = current_sequence[:]
+            else:
+                idx1, idx2 = random.sample(range(len(neighbor_sequence)), 2)
+                neighbor_sequence[idx1], neighbor_sequence[idx2] = neighbor_sequence[idx2], neighbor_sequence[idx1]
+
             neighbor_sol = self.scheduler.build_from_sequence(neighbor_sequence)
             neighbor_makespan = neighbor_sol.makespan
             

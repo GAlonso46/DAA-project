@@ -1,77 +1,82 @@
-from typing import List, Dict, Tuple
-from itertools import product
+from typing import List, Dict, Tuple, Generator
+from itertools import permutations
 from src.core.model import ProblemInstance, Solution, Job
 
 class BruteForceSolver:
-    """
-    Brute-force solver that enumerates all assignments of jobs to machines.
-    For each assignment (a vector of length n with values in 1..m) it
-    constructs a feasible schedule that preserves the order of jobs assigned
-    to each machine (jobs appear in the same order as in problem.jobs).
-
-    Warning: complexity is m^n and grows quickly. The implementation raises
-    a RuntimeError if the number of combinations exceeds 1_000_000 to avoid
-    accidental exhaustive runs on large instances.
-    """
     def __init__(self, problem: ProblemInstance, max_combinations: int = None):
-        # allow unlimited search when max_combinations is None
         self.problem = problem
         self.max_combinations = max_combinations
 
     def solve(self) -> Solution:
         n = len(self.problem.jobs)
         m = self.problem.num_machines
-        total = m ** n
-        # No longer raise on large combination counts. If max_combinations is set
-        # it is treated as advisory but will not stop execution here.
+        
         best_sol = None
         best_makespan = float('inf')
 
-        # Iterate over all assignments: for each job i assign machine in 1..m
-        for assign in product(range(1, m+1), repeat=n):
-            # Build per-machine queues preserving original job order
-            machine_queues: Dict[int, List[Job]] = {i: [] for i in range(1, m+1)}
-            for job, mach in zip(self.problem.jobs, assign):
-                # keep original job metadata but do not copy start/assigned fields yet
-                machine_queues[mach].append(job)
+        # 1. Permutamos el orden de los trabajos (n!)
+        for job_order in permutations(self.problem.jobs):
+            
+            # 2. Generamos solo asignaciones ÚNICAS de máquinas (evitando simetría)
+            for assign in self._get_unique_assignments(n, m):
+                
+                machine_queues: Dict[int, List[Job]] = {i: [] for i in range(1, m + 1)}
+                
+                # Asignamos trabajos a máquinas según la partición generada
+                for job, mach in zip(job_order, assign):
+                    machine_queues[mach].append(job)
 
-            # Now simulate scheduling for this fixed assignment
-            sol = self._build_schedule_for_assignment(machine_queues)
+                sol = self._build_schedule_for_assignment(machine_queues)
 
-            if sol is None:
-                # infeasible assignment (resource violations that cannot be resolved)
-                continue
+                if sol is None:
+                    continue
 
-            if sol.makespan < best_makespan:
-                best_makespan = sol.makespan
-                best_sol = sol
+                if sol.makespan < best_makespan:
+                    best_makespan = sol.makespan
+                    best_sol = sol
 
         if best_sol is None:
             return Solution(jobs=[], makespan=0, valid=False)
         return best_sol
 
+    def _get_unique_assignments(self, n: int, m: int) -> Generator[Tuple[int, ...], None, None]:
+        """
+        Genera asignaciones de n trabajos a m máquinas idénticas evitando simetrías.
+        Utiliza una técnica de backtracking para generar particiones de un conjunto.
+        """
+        def backtrack(current_assignment: List[int], max_machine_used: int):
+            if len(current_assignment) == n:
+                yield tuple(current_assignment)
+                return
+
+            # Opción A: Asignar a cualquiera de las máquinas ya "abiertas"
+            for i in range(1, max_machine_used + 1):
+                yield from backtrack(current_assignment + [i], max_machine_used)
+            
+            # Opción B: Abrir una máquina nueva (si no hemos llegado al límite m)
+            if max_machine_used < m:
+                yield from backtrack(current_assignment + [max_machine_used + 1], max_machine_used + 1)
+
+        yield from backtrack([], 0)
+
     def _build_schedule_for_assignment(self, machine_queues: Dict[int, List[Job]]) -> Solution:
-        # machine_free_time
+        # Mantiene tu lógica original de simulación
         machine_free_time = {i: 0 for i in range(1, self.problem.num_machines + 1)}
-        resource_timeline: Dict[int, Dict[int, int]] = {}  # t -> {r_id -> qty}
+        resource_timeline: Dict[int, Dict[int, int]] = {}
         solution_jobs: List[Job] = []
         completion_times = {0}
-        remaining = {i: list(queue) for i, queue in machine_queues.items()}  # copies
+        remaining = {i: list(queue) for i, queue in machine_queues.items()}
 
-        # While there are jobs remaining
         while any(len(q) > 0 for q in remaining.values()):
-            candidates: List[Tuple[int, int, Job]] = []  # (start_time, machine, job)
+            candidates: List[Tuple[int, int, Job]] = []
 
-            # For each machine with pending job, find earliest feasible start for its next job
             for m_id, q in remaining.items():
                 if not q:
                     continue
                 job = q[0]
                 m_free = machine_free_time[m_id]
-                # Candidate times are completion_times >= m_free plus m_free itself
                 cand_times = sorted([t for t in completion_times if t >= m_free])
                 if m_free not in completion_times:
-                    # ensure m_free is considered
                     cand_times.insert(0, m_free)
                     cand_times.sort()
 
@@ -82,27 +87,13 @@ class BruteForceSolver:
                         break
                 if found != -1:
                     candidates.append((found, m_id, job))
-                else:
-                    # this machine's next job cannot start at any known event; skip
-                    pass
 
             if not candidates:
-                # No candidate start found at known events — try advancing to next time unit
-                # Find next smallest completion_time > min(machine_free_time)
-                future_times = [t for t in completion_times if t > min(machine_free_time.values())]
-                if not future_times:
-                    # nothing to advance to, assignment infeasible
-                    return None
-                # advance by adding the minimum future time as a new event (loop will consider it)
-                # this is already in completion_times; so just continue to attempt scheduling
-                # but to avoid infinite loop, break as infeasible
                 return None
 
-            # pick candidate with smallest start_time (tie-breaker: smallest machine id)
             candidates.sort(key=lambda x: (x[0], x[1]))
             start_t, chosen_m, chosen_job = candidates[0]
 
-            # schedule it
             job_node = Job(
                 id=chosen_job.id,
                 duration=chosen_job.duration,
@@ -117,7 +108,6 @@ class BruteForceSolver:
             completion_times.add(finish_t)
             self._mark_resources_used(start_t, finish_t, job_node.resource_requirements, resource_timeline)
 
-            # pop from the queue
             remaining[chosen_m].pop(0)
 
         makespan = max((j.start_time + j.duration) for j in solution_jobs) if solution_jobs else 0

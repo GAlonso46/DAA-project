@@ -200,8 +200,7 @@ Para establecer la complejidad computacional del problema de optimización plant
 
 \textbf{Teorema 1.} El problema de decisión $\Pi_{sched}$ es \textbf{NP-completo}. En consecuencia, el problema de optimización asociado es \textbf{NP-duro}.
 
-\textbf{Estrategia de Demostración:}
-Para demostrar que un problema es NP-completo, deben cumplirse dos condiciones:
+Para que este teorema sea aplicable a este caso se debe probar que el problema de decisión es NP-Completo para lo cual deben cumplirse dos condiciones:
 \begin{enumerate}
   \item \textbf{Condición 1 (Pertenencia a NP):} Demostrar que, dada una solución propuesta (certificado), es posible verificar su validez en tiempo polinomial.
   \item \textbf{Condición 2 (NP-dureza):} Demostrar que un problema conocido como NP-completo (en este caso \textbf{PARTITION}) se reduce polinomialmente a una instancia restringida de nuestro problema.
@@ -278,35 +277,49 @@ En esta sección se detallan las estrategias algorítmicas diseñadas para resol
 
 \subsubsection*{1. BruteForceSolver (\texttt{bruteforce.py})}
 
-Este solver implementa un enfoque de búsqueda exhaustiva para garantizar el óptimo global en instancias de tamaño reducido.
+Este solver implementa un enfoque de búsqueda exhaustiva total que garantiza el óptimo global al explorar tanto el espacio de asignación de máquinas como el de secuenciación de trabajos, optimizando el tiempo de cómputo mediante la eliminación de simetrías.
 
 \begin{itemize}
-    \item \textbf{Idea algorítmica:} El algoritmo enumera todas las asignaciones posibles de $n$ trabajos a $m$ máquinas (un espacio de búsqueda de $m^n$). Para cada asignación, construye un horario factible preservando el orden relativo de los trabajos. La construcción del horario utiliza una simulación por ``eventos'' (instantes de finalización o liberación), manteniendo una línea temporal discreta para la gestión de recursos acumulativos.
-    \item \textbf{Complejidad:} 
-    \begin{itemize}
-        \item \textbf{Tiempo:} $O(m^n \cdot C_{sched})$, donde $C_{sched}$ es el coste de simular el horario (dependiente de $n$, $m$ y los chequeos de recursos).
-        \item \textbf{Espacio:} $O(n + m + R)$, para almacenar la mejor solución y las estructuras de uso de recursos.
-    \end{itemize}
+    \item \textbf{Idea algorítmica:} El algoritmo explora el producto cartesiano de dos espacios: las permutaciones de los trabajos ($n!$) y las asignaciones únicas de máquinas. Para evitar la redundancia debida a que las máquinas son idénticas, se utilizan \textit{Particiones de un Conjunto} (basadas en números de Stirling de segunda especie), lo que reduce el factor de búsqueda de máquinas de $m^n$ a una fracción significativamente menor. Para cada combinación de orden y asignación, se simula un horario mediante una política de eventos discretos.
+    \item \textbf{Complejidad Temporal:} $O(n! \cdot S(n, m) \cdot (n \cdot m \cdot D))$, donde $S(n, m)$ es el número de Stirling de segunda especie y $D$ es la duración promedio de los trabajos (debido al chequeo de recursos).
+    \item \textbf{Complejidad Espacial:} $O(n + m + (n \cdot D))$, para almacenar el \textit{timeline} de recursos y las estructuras de las colas.
 \end{itemize}
 
+\textbf{Pseudocódigo Principal}
 \begin{verbatim}
-Entrada: problem (n trabajos, m máquinas), max_combinations
-if m^n > max_combinations: error
-
+Entrada: problem (n trabajos, m máquinas)
 mejor_sol ← None; mejor_makespan ← ∞
 
-for cada asignación assign ∈ {1..m}^n:
-    machine_queues ← construir colas preservando orden original
-    sol ← BuildScheduleForAssignment(machine_queues)
-    if sol != None and sol.makespan < mejor_makespan:
-        mejor_makespan ← sol.makespan
-        mejor_sol ← sol
+for cada permutación orden ∈ Permutaciones(problem.jobs):
+    # Generar asignaciones únicas para máquinas idénticas
+    for cada asignación única assign ∈ Particiones(orden, m):
+        machine_queues ← construir colas siguiendo 'orden' y 'assign'
+        sol ← BuildScheduleForAssignment(machine_queues)
+        
+        if sol != None y sol.makespan < mejor_makespan:
+            mejor_makespan ← sol.makespan
+            mejor_sol ← sol
 return mejor_sol
 \end{verbatim}
 
-\textbf{Subrutina: BuildScheduleForAssignment}
-Simula la ejecución de una asignación fija. Si en algún punto un trabajo no puede ser ubicado por restricciones de recursos, la asignación se descarta.
+\textbf{Análisis de Correctitud}
+La correctitud del algoritmo para hallar el óptimo global se basa en dos pilares:
+\begin{enumerate}
+    \item \textbf{Completitud del espacio de búsqueda:} En problemas de agendamiento con recursos, el óptimo siempre reside en un \textit{horario activo}. Un horario activo puede ser unívocamente definido por una lista de prioridades y una asignación de recursos. Al explorar todas las permutaciones $n!$, el algoritmo garantiza evaluar todas las jerarquías de prioridad posibles. Al evaluar todas las particiones de conjuntos, cubre todas las asignaciones de máquinas posibles, eliminando solo aquellas que son redundantes por simetría (máquinas idénticas).
+    \item \textbf{Simulación ASAP (\textit{As Soon As Possible}):} La subrutina \texttt{BuildSchedule} coloca cada trabajo en el primer instante de tiempo disponible que satisface tanto la disponibilidad de la máquina como la capacidad de los recursos. Esto garantiza que para una secuencia y asignación dadas, el \textit{makespan} resultante es el mínimo posible.
+\end{enumerate}
 
+\textbf{Análisis de Complejidad Temporal Detallado}
+El coste total se define por la multiplicación de tres factores:
+\begin{enumerate}
+    \item \textbf{Factor de Ordenación ($n!$):} El número de formas de priorizar los trabajos.
+    \item \textbf{Factor de Asignación ($S(n, m)$):} El número de formas de repartir $n$ elementos en $m$ subconjuntos no vacíos. Aunque $S(n, m) < m^n$, el crecimiento sigue siendo exponencial.
+    \item \textbf{Factor de Simulación ($C_{sched}$):} Por cada iteración, se procesan $n$ trabajos. Para cada uno, se buscan candidatos en el conjunto de tiempos de finalización (hasta $n$ eventos) y se verifica la disponibilidad de recursos durante la duración del trabajo ($D$). Esto resulta en un coste aproximado de $O(n^2 \cdot D)$.
+\end{enumerate}
+En conjunto, el algoritmo es de clase exponencial, garantizando la solución óptima a cambio de un tiempo de ejecución que escala según $O(n! \cdot m^n \cdot n^2)$.
+
+\textbf{Subrutina: BuildScheduleForAssignment}
+Simula la ejecución de una asignación y orden fijos.
 \begin{verbatim}
 function BuildScheduleForAssignment(machine_queues):
     machine_free_time[m] ← 0; timeline ← {}; completion_times ← {0}
@@ -315,18 +328,25 @@ function BuildScheduleForAssignment(machine_queues):
     while existe trabajo en remaining:
         candidates ← []
         for cada máquina i con cola no vacía:
-            job ← primer trabajo de remaining[i]
-            cand_times ← sorted({t ∈ completion_times | t ≥ machine_free_time[i]})
-            found ← primer t tal que CheckResources(t, job)
-            if found existe: candidates.append((found, i, job))
+            job ← remaining[i].head()
+            # Buscar el primer instante factible en los eventos conocidos
+            for t ∈ sorted(completion_times) donde t ≥ machine_free_time[i]:
+                if CheckResources(t, job.duration, job.resources, timeline):
+                    candidates.append((t, i, job))
+                    break
         
-        if candidates vacío: return None
-        elegir (start, m, job) con menor start
-        asignar job; actualizar timeline y tiempos; pop job de remaining[m]
+        if candidates vacío: return None # Inviable
+        elegir (start, m, job) con menor start (y menor machine_id como desempate)
+        
+        # Registrar en la solución y marcar recursos
+        job.start ← start; solution_jobs.add(job)
+        machine_free_time[m] ← start + job.duration
+        completion_times.add(start + job.duration)
+        MarcarRecursosEnTimeline(start, job.duration, job.resources, timeline)
+        remaining[m].pop()
     
     return Solution(solution_jobs, max(finish_times))
 \end{verbatim}
-
 
 
 \subsubsection*{2. EarliestStartSolver (\texttt{earliest\_start\_solver.py})}
@@ -388,14 +408,38 @@ while unassigned no vacío:
 
 \subsubsection*{3. GeneticSolver (\texttt{metaheuristic.py})}
 
-Metaheurística poblacional que explora el espacio de permutaciones de trabajos para minimizar el \textit{makespan}.
+Metaheurística poblacional que explora el espacio de permutaciones de trabajos para minimizar el \textit{makespan}. Este enfoque permite evadir óptimos locales mediante operadores estocásticos de evolución.
 
 \begin{itemize}
-    \item \textbf{Representación:} Cada individuo es una permutación de los trabajos. El \textit{fitness} se calcula convirtiendo la secuencia en un horario factible mediante el constructor de soluciones.
-    \item \textbf{Operadores:} Utiliza selección por torneo ($k=3$), cruce de orden (\textit{Order Crossover} - OX) para preservar la estructura secuencial, y mutación por intercambio (\textit{swap}).
-    \item \textbf{Mecanismo de Reinicio:} Si la población se estanca (no hay mejora en $X$ generaciones), se realiza un reinicio manteniendo solo a los individuos de élite para fomentar la exploración de nuevas zonas del espacio de búsqueda.
+    \item \textbf{Representación:} Cada individuo del algoritmo se codifica como una permutación de los $n$ trabajos. El \textit{fitness} (aptitud) se determina mediante el decodificador \texttt{SolutionBuilder.build\_from\_sequence}, que transforma la secuencia en un cronograma factible respetando las restricciones de recursos.
+    \item \textbf{Operadores Evolutivos:}
+    \begin{itemize}
+        \item \textbf{Selección:} Torneo probabilístico ($k=3$), que garantiza una presión selectiva equilibrada.
+        \item \textbf{Cruce (Crossover):} Operador de Cruce de Orden (OX), diseñado específicamente para preservar la precedencia relativa de las tareas.
+        \item \textbf{Mutación:} Intercambio (\textit{swap}) de posiciones aleatorias para reintroducir diversidad genética.
+    \end{itemize}
+    \item \textbf{Estrategias de Convergencia:} Implementa \textbf{elitismo} para preservar las mejores soluciones encontradas y un \textbf{mecanismo de reinicio} (\textit{restart}) que reinyecta individuos aleatorios si la población converge prematuramente.
 \end{itemize}
 
+
+
+\paragraph{Parametrización del Modelo}
+Para garantizar la convergencia y robustez en las instancias evaluadas, se han definido los siguientes parámetros de control:
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{lp{8cm}l}
+\hline
+\textbf{Parámetro} & \textbf{Definición técnica} & \textbf{Valor} \\ \hline
+\texttt{pop\_size} & Tamaño de la población; número de soluciones candidatas mantenidas simultáneamente. & 100 \\
+\texttt{generations} & Límite máximo de iteraciones del ciclo evolutivo. & 300 \\
+\texttt{mutation\_rate} & Probabilidad de que un individuo sufra una alteración aleatoria en su estructura. & 0.25 \\
+\texttt{crossover\_rate} & Probabilidad de que dos padres intercambien material genético para generar descendencia. & 0.9 \\
+\texttt{restart\_threshold} & Umbral de generaciones sin mejora antes de forzar un reinicio de la población. & 40 \\ \hline
+\end{tabular}
+\end{table}
+
+La configuración de un \texttt{mutation\_rate} relativamente alto ($0.25$) junto con el \texttt{restart\_threshold} asegura una exploración agresiva del espacio de soluciones, mitigando el riesgo de estancamiento en mesetas de \textit{makespan} subóptimas.
 
 
 \begin{verbatim}

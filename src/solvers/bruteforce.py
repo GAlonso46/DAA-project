@@ -60,7 +60,7 @@ class BruteForceSolver:
         yield from backtrack([], 0)
 
     def _build_schedule_for_assignment(self, machine_queues: Dict[int, List[Job]]) -> Solution:
-        # Mantiene tu lógica original de simulación
+        
         machine_free_time = {i: 0 for i in range(1, self.problem.num_machines + 1)}
         resource_timeline: Dict[int, Dict[int, int]] = {}
         solution_jobs: List[Job] = []

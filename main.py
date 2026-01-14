@@ -3,7 +3,6 @@ from src.core.model import Job, ProblemInstance
 from src.solvers.greedy import GreedySolver
 from src.solvers.metaheuristic import GeneticSolver
 from src.solvers.simulated_annealing import SimulatedAnnealingSolver
-from src.solvers.tabu_search import TabuSearchSolver
 from src.utils.advanced_visualizer import AdvancedVisualizer
 from src.solvers.bruteforce import BruteForceSolver
 from src.solvers.earliest_start_solver import EarliestStartSolver

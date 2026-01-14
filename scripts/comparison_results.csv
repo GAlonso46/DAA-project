@@ -1,0 +1,15 @@
+scenario,solver,makespan,runtime,status
+Bottleneck,EarliestStart,800,0.23673176765441895,ok
+Bottleneck,Genetic,789,69.63579368591309,ok
+HighContention,EarliestStart,101,0.09706401824951172,ok
+HighContention,Genetic,80,29.011168479919434,ok
+RockSand,EarliestStart,100,0.035286903381347656,ok
+RockSand,Genetic,100,8.987956762313843,ok
+Irrelevant,EarliestStart,165,0.11853623390197754,ok
+Irrelevant,Genetic,149,28.356224536895752,ok
+GreedyKiller,EarliestStart,200,0.031943321228027344,ok
+GreedyKiller,Genetic,200,6.074359893798828,ok
+Random1,EarliestStart,76,0.05786752700805664,ok
+Random1,Genetic,74,16.990543127059937,ok
+Random2,EarliestStart,84,0.05945944786071777,ok
+Random2,Genetic,80,21.25013017654419,ok

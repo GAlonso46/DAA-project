@@ -129,6 +129,25 @@ def main():
         writer = csv.DictWriter(csvf, fieldnames=fieldnames)
         writer.writeheader()
 
+
+    # Utility: load scenario generator
+    def _import_scenario_generator():
+        try:
+            # Import from local directory (experiments/)
+            import importlib.util
+            spec = importlib.util.spec_from_file_location("scenario_generator", 
+                str(Path(__file__).parent / "scenario_generator.py"))
+            if spec and spec.loader:
+                mod = importlib.util.module_from_spec(spec)
+                spec.loader.exec_module(mod)
+                return mod
+            return None
+        except Exception as e:
+            print('Error importing scenario generator module:', e)
+            import traceback
+            traceback.print_exc()
+            return None
+
     # import generator
     gen = _import_generator()
     random_instances = []
@@ -145,9 +164,31 @@ def main():
     else:
         print('Generator not available; no random instances created.')
 
-    sample_instances = load_sample_instances(5)
+    # Generate scenario instances
+    scenario_gen = _import_scenario_generator()
+    scenario_instances = []
+    SCENARIO_REPLICAS = 2 # Number of replicas per scenario type
+    if scenario_gen is not None:
+        scenario_instances = scenario_gen.generate_all_scenarios(SCENARIO_REPLICAS)
+        print(f"Generated {len(scenario_instances)} scenario instances.")
 
-    instances = random_instances + sample_instances
+    # Removed loading from sample.json as requested
+    # sample_instances = load_sample_instances(5)
+
+    instances = random_instances + scenario_instances
+
+    # Save instances to a JSON file for record keeping
+    import datetime
+    timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+    log_data = {
+        "timestamp": datetime.datetime.now().isoformat(),
+        "instances": {k: v for k, v in instances}
+    }
+    log_file = RESULTS_CSV.parent / f'run_instances_{timestamp}.json'
+    with open(log_file, 'w') as f:
+        json.dump(log_data, f, indent=2)
+    print(f'Saved run instances to {log_file}')
+
     print(f'Running experiments on {len(instances)} instances')
 
     # main loop

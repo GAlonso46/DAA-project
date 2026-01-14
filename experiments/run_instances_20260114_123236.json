@@ -1,0 +1,1330 @@
+{
+  "timestamp": "2026-01-14T12:32:36.849499",
+  "instances": {
+    "random_1": {
+      "num_machines": 2,
+      "resources": {
+        "1": 4,
+        "2": 2
+      },
+      "jobs": [
+        {
+          "id": 1,
+          "duration": 20,
+          "requirements": {
+            "1": 1
+          }
+        },
+        {
+          "id": 2,
+          "duration": 18,
+          "requirements": {}
+        }
+      ]
+    },
+    "random_2": {
+      "num_machines": 1,
+      "resources": {
+        "1": 1,
+        "2": 3
+      },
+      "jobs": [
+        {
+          "id": 1,
+          "duration": 19,
+          "requirements": {
+            "2": 3
+          }
+        }
+      ]
+    },
+    "random_3": {
+      "num_machines": 2,
+      "resources": {},
+      "jobs": [
+        {
+          "id": 1,
+          "duration": 8,
+          "requirements": {}
+        },
+        {
+          "id": 2,
+          "duration": 3,
+          "requirements": {}
+        },
+        {
+          "id": 3,
+          "duration": 13,
+          "requirements": {}
+        },
+        {
+          "id": 4,
+          "duration": 3,
+          "requirements": {}
+        },
+        {
+          "id": 5,
+          "duration": 9,
+          "requirements": {}
+        },
+        {
+          "id": 6,
+          "duration": 7,
+          "requirements": {}
+        }
+      ]
+    },
+    "random_4": {
+      "num_machines": 3,
+      "resources": {},
+      "jobs": [
+        {
+          "id": 1,
+          "duration": 15,
+          "requirements": {}
+        },
+        {
+          "id": 2,
+          "duration": 9,
+          "requirements": {}
+        }
+      ]
+    },
+    "random_5": {
+      "num_machines": 1,
+      "resources": {},
+      "jobs": [
+        {
+          "id": 1,
+          "duration": 17,
+          "requirements": {}
+        }
+      ]
+    },
+    "bottleneck_gen_1": {
+      "num_machines": 5,
+      "resources": {
+        "CommonTool": 2
+      },
+      "jobs": [
+        {
+          "id": 1,
+          "duration": 14,
+          "requirements": {
+            "CommonTool": 1
+          }
+        },
+        {
+          "id": 2,
+          "duration": 6,
+          "requirements": {
+            "CommonTool": 1
+          }
+        },
+        {
+          "id": 3,
+          "duration": 10,
+          "requirements": {
+            "CommonTool": 1
+          }
+        },
+        {
+          "id": 4,
+          "duration": 14,
+          "requirements": {
+            "CommonTool": 1
+          }
+        },
+        {
+          "id": 5,
+          "duration": 6,
+          "requirements": {
+            "CommonTool": 1
+          }
+        },
+        {
+          "id": 6,
+          "duration": 6,
+          "requirements": {
+            "CommonTool": 1
+          }
+        }
+      ]
+    },
+    "bottleneck_gen_2": {
+      "num_machines": 5,
+      "resources": {
+        "CommonTool": 2
+      },
+      "jobs": [
+        {
+          "id": 1,
+          "duration": 12,
+          "requirements": {
+            "CommonTool": 1
+          }
+        },
+        {
+          "id": 2,
+          "duration": 9,
+          "requirements": {
+            "CommonTool": 1
+          }
+        },
+        {
+          "id": 3,
+          "duration": 6,
+          "requirements": {
+            "CommonTool": 1
+          }
+        },
+        {
+          "id": 4,
+          "duration": 7,
+          "requirements": {
+            "CommonTool": 1
+          }
+        },
+        {
+          "id": 5,
+          "duration": 7,
+          "requirements": {
+            "CommonTool": 1
+          }
+        },
+        {
+          "id": 6,
+          "duration": 12,
+          "requirements": {
+            "CommonTool": 1
+          }
+        }
+      ]
+    },
+    "bottleneck_gen_3": {
+      "num_machines": 5,
+      "resources": {
+        "CommonTool": 2
+      },
+      "jobs": [
+        {
+          "id": 1,
+          "duration": 12,
+          "requirements": {
+            "CommonTool": 1
+          }
+        },
+        {
+          "id": 2,
+          "duration": 9,
+          "requirements": {
+            "CommonTool": 1
+          }
+        },
+        {
+          "id": 3,
+          "duration": 13,
+          "requirements": {
+            "CommonTool": 1
+          }
+        },
+        {
+          "id": 4,
+          "duration": 15,
+          "requirements": {
+            "CommonTool": 1
+          }
+        },
+        {
+          "id": 5,
+          "duration": 10,
+          "requirements": {
+            "CommonTool": 1
+          }
+        },
+        {
+          "id": 6,
+          "duration": 12,
+          "requirements": {
+            "CommonTool": 1
+          }
+        }
+      ]
+    },
+    "bottleneck_gen_4": {
+      "num_machines": 5,
+      "resources": {
+        "CommonTool": 2
+      },
+      "jobs": [
+        {
+          "id": 1,
+          "duration": 9,
+          "requirements": {
+            "CommonTool": 1
+          }
+        },
+        {
+          "id": 2,
+          "duration": 7,
+          "requirements": {
+            "CommonTool": 1
+          }
+        },
+        {
+          "id": 3,
+          "duration": 8,
+          "requirements": {
+            "CommonTool": 1
+          }
+        },
+        {
+          "id": 4,
+          "duration": 6,
+          "requirements": {
+            "CommonTool": 1
+          }
+        },
+        {
+          "id": 5,
+          "duration": 9,
+          "requirements": {
+            "CommonTool": 1
+          }
+        },
+        {
+          "id": 6,
+          "duration": 8,
+          "requirements": {
+            "CommonTool": 1
+          }
+        }
+      ]
+    },
+    "bottleneck_gen_5": {
+      "num_machines": 5,
+      "resources": {
+        "CommonTool": 2
+      },
+      "jobs": [
+        {
+          "id": 1,
+          "duration": 13,
+          "requirements": {
+            "CommonTool": 1
+          }
+        },
+        {
+          "id": 2,
+          "duration": 9,
+          "requirements": {
+            "CommonTool": 1
+          }
+        },
+        {
+          "id": 3,
+          "duration": 10,
+          "requirements": {
+            "CommonTool": 1
+          }
+        },
+        {
+          "id": 4,
+          "duration": 8,
+          "requirements": {
+            "CommonTool": 1
+          }
+        },
+        {
+          "id": 5,
+          "duration": 12,
+          "requirements": {
+            "CommonTool": 1
+          }
+        },
+        {
+          "id": 6,
+          "duration": 11,
+          "requirements": {
+            "CommonTool": 1
+          }
+        }
+      ]
+    },
+    "high_contention_gen_1": {
+      "num_machines": 5,
+      "resources": {
+        "R1": 1,
+        "R2": 1,
+        "R3": 1,
+        "R4": 1,
+        "R5": 1,
+        "R6": 1
+      },
+      "jobs": [
+        {
+          "id": 1,
+          "duration": 10,
+          "requirements": {
+            "R1": 1,
+            "R2": 1
+          }
+        },
+        {
+          "id": 2,
+          "duration": 9,
+          "requirements": {
+            "R2": 1,
+            "R3": 1
+          }
+        },
+        {
+          "id": 3,
+          "duration": 9,
+          "requirements": {
+            "R3": 1,
+            "R4": 1
+          }
+        },
+        {
+          "id": 4,
+          "duration": 8,
+          "requirements": {
+            "R4": 1,
+            "R5": 1
+          }
+        },
+        {
+          "id": 5,
+          "duration": 9,
+          "requirements": {
+            "R5": 1,
+            "R6": 1
+          }
+        },
+        {
+          "id": 6,
+          "duration": 9,
+          "requirements": {
+            "R6": 1,
+            "R5": 1
+          }
+        }
+      ]
+    },
+    "high_contention_gen_2": {
+      "num_machines": 5,
+      "resources": {
+        "R1": 1,
+        "R2": 1,
+        "R3": 1,
+        "R4": 1,
+        "R5": 1,
+        "R6": 1
+      },
+      "jobs": [
+        {
+          "id": 1,
+          "duration": 11,
+          "requirements": {
+            "R1": 1,
+            "R2": 1
+          }
+        },
+        {
+          "id": 2,
+          "duration": 8,
+          "requirements": {
+            "R2": 1,
+            "R3": 1
+          }
+        },
+        {
+          "id": 3,
+          "duration": 9,
+          "requirements": {
+            "R3": 1,
+            "R4": 1
+          }
+        },
+        {
+          "id": 4,
+          "duration": 10,
+          "requirements": {
+            "R4": 1,
+            "R5": 1
+          }
+        },
+        {
+          "id": 5,
+          "duration": 10,
+          "requirements": {
+            "R5": 1,
+            "R6": 1
+          }
+        },
+        {
+          "id": 6,
+          "duration": 9,
+          "requirements": {
+            "R6": 1,
+            "R5": 1
+          }
+        }
+      ]
+    },
+    "high_contention_gen_3": {
+      "num_machines": 5,
+      "resources": {
+        "R1": 1,
+        "R2": 1,
+        "R3": 1,
+        "R4": 1,
+        "R5": 1,
+        "R6": 1
+      },
+      "jobs": [
+        {
+          "id": 1,
+          "duration": 12,
+          "requirements": {
+            "R1": 1,
+            "R2": 1
+          }
+        },
+        {
+          "id": 2,
+          "duration": 8,
+          "requirements": {
+            "R2": 1,
+            "R3": 1
+          }
+        },
+        {
+          "id": 3,
+          "duration": 11,
+          "requirements": {
+            "R3": 1,
+            "R4": 1
+          }
+        },
+        {
+          "id": 4,
+          "duration": 8,
+          "requirements": {
+            "R4": 1,
+            "R5": 1
+          }
+        },
+        {
+          "id": 5,
+          "duration": 8,
+          "requirements": {
+            "R5": 1,
+            "R6": 1
+          }
+        },
+        {
+          "id": 6,
+          "duration": 8,
+          "requirements": {
+            "R6": 1,
+            "R5": 1
+          }
+        }
+      ]
+    },
+    "high_contention_gen_4": {
+      "num_machines": 5,
+      "resources": {
+        "R1": 1,
+        "R2": 1,
+        "R3": 1,
+        "R4": 1,
+        "R5": 1,
+        "R6": 1
+      },
+      "jobs": [
+        {
+          "id": 1,
+          "duration": 11,
+          "requirements": {
+            "R1": 1,
+            "R2": 1
+          }
+        },
+        {
+          "id": 2,
+          "duration": 11,
+          "requirements": {
+            "R2": 1,
+            "R3": 1
+          }
+        },
+        {
+          "id": 3,
+          "duration": 11,
+          "requirements": {
+            "R3": 1,
+            "R4": 1
+          }
+        },
+        {
+          "id": 4,
+          "duration": 11,
+          "requirements": {
+            "R4": 1,
+            "R5": 1
+          }
+        },
+        {
+          "id": 5,
+          "duration": 11,
+          "requirements": {
+            "R5": 1,
+            "R6": 1
+          }
+        },
+        {
+          "id": 6,
+          "duration": 11,
+          "requirements": {
+            "R6": 1,
+            "R5": 1
+          }
+        }
+      ]
+    },
+    "high_contention_gen_5": {
+      "num_machines": 5,
+      "resources": {
+        "R1": 1,
+        "R2": 1,
+        "R3": 1,
+        "R4": 1,
+        "R5": 1,
+        "R6": 1
+      },
+      "jobs": [
+        {
+          "id": 1,
+          "duration": 9,
+          "requirements": {
+            "R1": 1,
+            "R2": 1
+          }
+        },
+        {
+          "id": 2,
+          "duration": 9,
+          "requirements": {
+            "R2": 1,
+            "R3": 1
+          }
+        },
+        {
+          "id": 3,
+          "duration": 8,
+          "requirements": {
+            "R3": 1,
+            "R4": 1
+          }
+        },
+        {
+          "id": 4,
+          "duration": 8,
+          "requirements": {
+            "R4": 1,
+            "R5": 1
+          }
+        },
+        {
+          "id": 5,
+          "duration": 8,
+          "requirements": {
+            "R5": 1,
+            "R6": 1
+          }
+        },
+        {
+          "id": 6,
+          "duration": 8,
+          "requirements": {
+            "R6": 1,
+            "R5": 1
+          }
+        }
+      ]
+    },
+    "rock_sand_gen_1": {
+      "num_machines": 5,
+      "resources": {
+        "HeavyTool": 1
+      },
+      "jobs": [
+        {
+          "id": 1,
+          "duration": 95,
+          "requirements": {
+            "HeavyTool": 1
+          }
+        },
+        {
+          "id": 2,
+          "duration": 7,
+          "requirements": {}
+        },
+        {
+          "id": 3,
+          "duration": 3,
+          "requirements": {}
+        },
+        {
+          "id": 4,
+          "duration": 6,
+          "requirements": {}
+        },
+        {
+          "id": 5,
+          "duration": 6,
+          "requirements": {}
+        },
+        {
+          "id": 6,
+          "duration": 7,
+          "requirements": {}
+        }
+      ]
+    },
+    "rock_sand_gen_2": {
+      "num_machines": 5,
+      "resources": {
+        "HeavyTool": 1
+      },
+      "jobs": [
+        {
+          "id": 1,
+          "duration": 93,
+          "requirements": {
+            "HeavyTool": 1
+          }
+        },
+        {
+          "id": 2,
+          "duration": 7,
+          "requirements": {}
+        },
+        {
+          "id": 3,
+          "duration": 6,
+          "requirements": {}
+        },
+        {
+          "id": 4,
+          "duration": 7,
+          "requirements": {}
+        },
+        {
+          "id": 5,
+          "duration": 5,
+          "requirements": {}
+        },
+        {
+          "id": 6,
+          "duration": 7,
+          "requirements": {}
+        }
+      ]
+    },
+    "rock_sand_gen_3": {
+      "num_machines": 5,
+      "resources": {
+        "HeavyTool": 1
+      },
+      "jobs": [
+        {
+          "id": 1,
+          "duration": 92,
+          "requirements": {
+            "HeavyTool": 1
+          }
+        },
+        {
+          "id": 2,
+          "duration": 4,
+          "requirements": {}
+        },
+        {
+          "id": 3,
+          "duration": 5,
+          "requirements": {}
+        },
+        {
+          "id": 4,
+          "duration": 6,
+          "requirements": {}
+        },
+        {
+          "id": 5,
+          "duration": 5,
+          "requirements": {}
+        },
+        {
+          "id": 6,
+          "duration": 6,
+          "requirements": {}
+        }
+      ]
+    },
+    "rock_sand_gen_4": {
+      "num_machines": 5,
+      "resources": {
+        "HeavyTool": 1
+      },
+      "jobs": [
+        {
+          "id": 1,
+          "duration": 95,
+          "requirements": {
+            "HeavyTool": 1
+          }
+        },
+        {
+          "id": 2,
+          "duration": 5,
+          "requirements": {}
+        },
+        {
+          "id": 3,
+          "duration": 4,
+          "requirements": {}
+        },
+        {
+          "id": 4,
+          "duration": 6,
+          "requirements": {}
+        },
+        {
+          "id": 5,
+          "duration": 7,
+          "requirements": {}
+        },
+        {
+          "id": 6,
+          "duration": 7,
+          "requirements": {}
+        }
+      ]
+    },
+    "rock_sand_gen_5": {
+      "num_machines": 5,
+      "resources": {
+        "HeavyTool": 1
+      },
+      "jobs": [
+        {
+          "id": 1,
+          "duration": 110,
+          "requirements": {
+            "HeavyTool": 1
+          }
+        },
+        {
+          "id": 2,
+          "duration": 6,
+          "requirements": {}
+        },
+        {
+          "id": 3,
+          "duration": 4,
+          "requirements": {}
+        },
+        {
+          "id": 4,
+          "duration": 3,
+          "requirements": {}
+        },
+        {
+          "id": 5,
+          "duration": 6,
+          "requirements": {}
+        },
+        {
+          "id": 6,
+          "duration": 4,
+          "requirements": {}
+        }
+      ]
+    },
+    "irrelevant_gen_1": {
+      "num_machines": 5,
+      "resources": {
+        "BasicTool": 5
+      },
+      "jobs": [
+        {
+          "id": 1,
+          "duration": 24,
+          "requirements": {
+            "BasicTool": 1
+          }
+        },
+        {
+          "id": 2,
+          "duration": 17,
+          "requirements": {
+            "BasicTool": 1
+          }
+        },
+        {
+          "id": 3,
+          "duration": 18,
+          "requirements": {
+            "BasicTool": 1
+          }
+        },
+        {
+          "id": 4,
+          "duration": 19,
+          "requirements": {
+            "BasicTool": 1
+          }
+        },
+        {
+          "id": 5,
+          "duration": 17,
+          "requirements": {
+            "BasicTool": 1
+          }
+        },
+        {
+          "id": 6,
+          "duration": 16,
+          "requirements": {
+            "BasicTool": 1
+          }
+        }
+      ]
+    },
+    "irrelevant_gen_2": {
+      "num_machines": 5,
+      "resources": {
+        "BasicTool": 5
+      },
+      "jobs": [
+        {
+          "id": 1,
+          "duration": 19,
+          "requirements": {
+            "BasicTool": 1
+          }
+        },
+        {
+          "id": 2,
+          "duration": 24,
+          "requirements": {
+            "BasicTool": 1
+          }
+        },
+        {
+          "id": 3,
+          "duration": 14,
+          "requirements": {
+            "BasicTool": 1
+          }
+        },
+        {
+          "id": 4,
+          "duration": 19,
+          "requirements": {
+            "BasicTool": 1
+          }
+        },
+        {
+          "id": 5,
+          "duration": 25,
+          "requirements": {
+            "BasicTool": 1
+          }
+        },
+        {
+          "id": 6,
+          "duration": 15,
+          "requirements": {
+            "BasicTool": 1
+          }
+        }
+      ]
+    },
+    "irrelevant_gen_3": {
+      "num_machines": 5,
+      "resources": {
+        "BasicTool": 5
+      },
+      "jobs": [
+        {
+          "id": 1,
+          "duration": 18,
+          "requirements": {
+            "BasicTool": 1
+          }
+        },
+        {
+          "id": 2,
+          "duration": 17,
+          "requirements": {
+            "BasicTool": 1
+          }
+        },
+        {
+          "id": 3,
+          "duration": 22,
+          "requirements": {
+            "BasicTool": 1
+          }
+        },
+        {
+          "id": 4,
+          "duration": 20,
+          "requirements": {
+            "BasicTool": 1
+          }
+        },
+        {
+          "id": 5,
+          "duration": 19,
+          "requirements": {
+            "BasicTool": 1
+          }
+        },
+        {
+          "id": 6,
+          "duration": 18,
+          "requirements": {
+            "BasicTool": 1
+          }
+        }
+      ]
+    },
+    "irrelevant_gen_4": {
+      "num_machines": 5,
+      "resources": {
+        "BasicTool": 5
+      },
+      "jobs": [
+        {
+          "id": 1,
+          "duration": 24,
+          "requirements": {
+            "BasicTool": 1
+          }
+        },
+        {
+          "id": 2,
+          "duration": 21,
+          "requirements": {
+            "BasicTool": 1
+          }
+        },
+        {
+          "id": 3,
+          "duration": 21,
+          "requirements": {
+            "BasicTool": 1
+          }
+        },
+        {
+          "id": 4,
+          "duration": 24,
+          "requirements": {
+            "BasicTool": 1
+          }
+        },
+        {
+          "id": 5,
+          "duration": 23,
+          "requirements": {
+            "BasicTool": 1
+          }
+        },
+        {
+          "id": 6,
+          "duration": 16,
+          "requirements": {
+            "BasicTool": 1
+          }
+        }
+      ]
+    },
+    "irrelevant_gen_5": {
+      "num_machines": 5,
+      "resources": {
+        "BasicTool": 5
+      },
+      "jobs": [
+        {
+          "id": 1,
+          "duration": 17,
+          "requirements": {
+            "BasicTool": 1
+          }
+        },
+        {
+          "id": 2,
+          "duration": 19,
+          "requirements": {
+            "BasicTool": 1
+          }
+        },
+        {
+          "id": 3,
+          "duration": 24,
+          "requirements": {
+            "BasicTool": 1
+          }
+        },
+        {
+          "id": 4,
+          "duration": 19,
+          "requirements": {
+            "BasicTool": 1
+          }
+        },
+        {
+          "id": 5,
+          "duration": 16,
+          "requirements": {
+            "BasicTool": 1
+          }
+        },
+        {
+          "id": 6,
+          "duration": 23,
+          "requirements": {
+            "BasicTool": 1
+          }
+        }
+      ]
+    },
+    "greedy_killer_gen_1": {
+      "num_machines": 2,
+      "resources": {
+        "CriticalTool": 1
+      },
+      "jobs": [
+        {
+          "id": 1,
+          "duration": 6,
+          "requirements": {
+            "CriticalTool": 1
+          }
+        },
+        {
+          "id": 2,
+          "duration": 5,
+          "requirements": {
+            "CriticalTool": 1
+          }
+        },
+        {
+          "id": 3,
+          "duration": 6,
+          "requirements": {
+            "CriticalTool": 1
+          }
+        },
+        {
+          "id": 4,
+          "duration": 23,
+          "requirements": {}
+        },
+        {
+          "id": 5,
+          "duration": 1,
+          "requirements": {}
+        },
+        {
+          "id": 6,
+          "duration": 1,
+          "requirements": {}
+        }
+      ]
+    },
+    "greedy_killer_gen_2": {
+      "num_machines": 2,
+      "resources": {
+        "CriticalTool": 1
+      },
+      "jobs": [
+        {
+          "id": 1,
+          "duration": 5,
+          "requirements": {
+            "CriticalTool": 1
+          }
+        },
+        {
+          "id": 2,
+          "duration": 6,
+          "requirements": {
+            "CriticalTool": 1
+          }
+        },
+        {
+          "id": 3,
+          "duration": 6,
+          "requirements": {
+            "CriticalTool": 1
+          }
+        },
+        {
+          "id": 4,
+          "duration": 24,
+          "requirements": {}
+        },
+        {
+          "id": 5,
+          "duration": 1,
+          "requirements": {}
+        },
+        {
+          "id": 6,
+          "duration": 1,
+          "requirements": {}
+        }
+      ]
+    },
+    "greedy_killer_gen_3": {
+      "num_machines": 2,
+      "resources": {
+        "CriticalTool": 1
+      },
+      "jobs": [
+        {
+          "id": 1,
+          "duration": 5,
+          "requirements": {
+            "CriticalTool": 1
+          }
+        },
+        {
+          "id": 2,
+          "duration": 6,
+          "requirements": {
+            "CriticalTool": 1
+          }
+        },
+        {
+          "id": 3,
+          "duration": 4,
+          "requirements": {
+            "CriticalTool": 1
+          }
+        },
+        {
+          "id": 4,
+          "duration": 25,
+          "requirements": {}
+        },
+        {
+          "id": 5,
+          "duration": 1,
+          "requirements": {}
+        },
+        {
+          "id": 6,
+          "duration": 1,
+          "requirements": {}
+        }
+      ]
+    },
+    "greedy_killer_gen_4": {
+      "num_machines": 2,
+      "resources": {
+        "CriticalTool": 1
+      },
+      "jobs": [
+        {
+          "id": 1,
+          "duration": 6,
+          "requirements": {
+            "CriticalTool": 1
+          }
+        },
+        {
+          "id": 2,
+          "duration": 4,
+          "requirements": {
+            "CriticalTool": 1
+          }
+        },
+        {
+          "id": 3,
+          "duration": 6,
+          "requirements": {
+            "CriticalTool": 1
+          }
+        },
+        {
+          "id": 4,
+          "duration": 26,
+          "requirements": {}
+        },
+        {
+          "id": 5,
+          "duration": 1,
+          "requirements": {}
+        },
+        {
+          "id": 6,
+          "duration": 1,
+          "requirements": {}
+        }
+      ]
+    },
+    "greedy_killer_gen_5": {
+      "num_machines": 2,
+      "resources": {
+        "CriticalTool": 1
+      },
+      "jobs": [
+        {
+          "id": 1,
+          "duration": 6,
+          "requirements": {
+            "CriticalTool": 1
+          }
+        },
+        {
+          "id": 2,
+          "duration": 6,
+          "requirements": {
+            "CriticalTool": 1
+          }
+        },
+        {
+          "id": 3,
+          "duration": 5,
+          "requirements": {
+            "CriticalTool": 1
+          }
+        },
+        {
+          "id": 4,
+          "duration": 27,
+          "requirements": {}
+        },
+        {
+          "id": 5,
+          "duration": 1,
+          "requirements": {}
+        },
+        {
+          "id": 6,
+          "duration": 1,
+          "requirements": {}
+        }
+      ]
+    }
+  }
+}

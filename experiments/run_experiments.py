@@ -36,10 +36,10 @@ SAMPLE_JSON = DATA_DIR / 'sample.json'
 GENERATOR_MODULE = 'src.core.generator'
 
 # Experiment parameters
-NUM_RANDOM = 25
-RANDOM_MAX_JOBS = 25
-RANDOM_MAX_MACHINES = 10
-RANDOM_MAX_RESOURCES = 10
+NUM_RANDOM = 5
+RANDOM_MAX_JOBS = 7
+RANDOM_MAX_MACHINES = 3
+RANDOM_MAX_RESOURCES = 2
 RUNS_PER_INSTANCE = 1
 TIMEOUT = 600  # seconds per run
 
@@ -167,7 +167,7 @@ def main():
     # Generate scenario instances
     scenario_gen = _import_scenario_generator()
     scenario_instances = []
-    SCENARIO_REPLICAS = 2 # Number of replicas per scenario type
+    SCENARIO_REPLICAS = 5 # Number of replicas per scenario type
     if scenario_gen is not None:
         scenario_instances = scenario_gen.generate_all_scenarios(SCENARIO_REPLICAS)
         print(f"Generated {len(scenario_instances)} scenario instances.")
